@@ -347,22 +347,25 @@ fi
 | A2 | `sfltool dumpbtm`'s `Disposition` field semantics (`enabled/disabled`, `allowed/disallowed`) map cleanly onto "silently disabled, no programmatic re-enable" for the purposes of BOOT-02 | Pattern 3 | `sfltool` is undocumented by Apple; its exact behavior around crash-triggered (vs. only user-triggered) disposition changes was not, and likely cannot be, fully reproduced in a ~90-second research session. A longer real-world crash-loop observation (hours, not seconds) is the D-05-mandated verification the plan must still schedule. |
 | A3 | No automatic `launchd`-level "disable" is ever triggered purely by repeated fast-exit crashes, at any timescale | Summary, Pattern 3 | Only ~10 crash cycles over ~75 seconds were observed live in this session. It remains possible (though nothing in `man launchd.plist(5)`/`man launchctl(1)` documents it, and none appeared in `launchctl print-disabled` during the test) that a much longer or more aggressive crash pattern behaves differently. Treat as high-confidence but not exhaustively proven; the plan's D-05 verification step should include a longer-duration observation if schedule allows. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Exact Phase 1/2 packaged Python interpreter and engine entrypoint paths**
    - What we know: Windows precedent is `path.join(directory, 'runtime', 'python.exe')` for the interpreter and `engine/service_host.py` for the boot-specific entrypoint `[VERIFIED: apps/desktop/main/index.ts:1275, docs/engine-contract.md:15]`.
    - What's unclear: The exact macOS subpath `python-build-standalone`'s `install_only` layout will produce once Phase 1 actually stages it, and whether `engine/service_host.py` is reused unchanged or needs a macOS-specific headless launcher.
    - Recommendation: The planner should add an explicit task to confirm these paths against Phase 1/2's real output (or coordinate directly with whichever phase lands first) before finalizing the plist template — do not ship the `[ASSUMED]` path from this research without that confirmation.
+   - RESOLVED: 03-02-PLAN.md Task 1 adds this exact confirmation step — it checks resolveMacEnginePythonPath() against Phase 1/2's real packaged output (correcting it if wrong) before Task 2 wires it into the real startup path.
 
 2. **Where in the app lifecycle should install/uninstall actually be triggered?**
    - What we know: Windows registration is entirely installer-owned (`build/installer.nsh`); the running app "never registers, elevates or stops the task itself" `[VERIFIED: docs/engine-contract.md:15]`. macOS has no installer-script equivalent for an unsigned local `.app`/`.dmg`/`.zip` build.
    - What's unclear: Whether install should happen automatically on first launch, behind an explicit user-facing toggle/setting, or both — CONTEXT.md's "Claude's Discretion" doesn't address the trigger point, only the plist keys and detection heuristic.
    - Recommendation: Default to first-launch automatic install (matching "autostart works without the user launching it manually," success criterion 1) with an uninstall path wired to app uninstall/removal if one exists, or at minimum a manual "disable autostart" action — this is the planner's call to make explicitly rather than leave implicit.
+   - RESOLVED: 03-02-PLAN.md's objective adopts automatic first-launch install, gated by detectState() for idempotency, with no separate settings toggle in this phase (matching this recommendation).
 
 3. **Extended (hours-scale) crash-loop behavior**
    - What we know: 10 rapid crash cycles over 75 seconds produced no `launchd`-level disable.
    - What's unclear: Whether a much longer sustained crash-loop (hours/days, matching real-world "user leaves their Mac on with a broken engine for a week" scenarios) ever triggers any additional OS-level throttling or state beyond the steady 10-second `ThrottleInterval`.
    - Recommendation: This is exactly the "real verification step" D-05 calls for — schedule it as an explicit, longer-duration manual verification task in the plan, not something this research session can complete.
+   - RESOLVED: 03-02-PLAN.md Task 2 carries this as a `<human-check>` item on its `<verify>` block, harvested into this phase's UAT.md at end-of-phase per `workflow.human_verify_mode = end-of-phase`, rather than blocking automated execution.
 
 ## Environment Availability
 
