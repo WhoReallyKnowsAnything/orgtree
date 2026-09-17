@@ -1,0 +1,38 @@
+{
+  "contract": "1.0.0",
+  "flavor": "core",
+  "milestone": null,
+  "phases": [
+    {
+      "number": "1",
+      "name": "Packaging & Runtime Foundation",
+      "status": "pending"
+    },
+    {
+      "number": "2",
+      "name": "Process Lifecycle Port",
+      "status": "pending"
+    },
+    {
+      "number": "3",
+      "name": "Launchd Autostart",
+      "status": "pending"
+    },
+    {
+      "number": "4",
+      "name": "macOS UI & OS Integration Parity",
+      "status": "pending"
+    },
+    {
+      "number": "5",
+      "name": "End-to-End Verification & Test Coverage",
+      "status": "pending"
+    }
+  ],
+  "next": {
+    "command": "/gsd:progress --next",
+    "label": "Advance to the next step (plan phase 1)",
+    "reason": "Phase 1 of 6 — needs a plan"
+  },
+  "updated_at": "2026-09-17T18:58:59.923Z"
+}

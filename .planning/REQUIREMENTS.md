@@ -20,7 +20,7 @@
 - [ ] **PROC-01**: Executable resolution (`providers.py` and related) resolves provider CLIs (Claude Code, Codex, Antigravity) correctly on macOS — verify existing `shutil.which()` fallback covers real macOS install paths (npm shims, Antigravity install location)
 - [ ] **PROC-02**: Process liveness checks work on macOS — verify existing POSIX branch in `liveness.py` (`os.kill(pid, 0)`) against real macOS behavior
 - [ ] **PROC-03**: Child-process containment (killing a provider CLI kills its descendants, not just the parent) works on macOS for every process spawn path, including `codexrun.py::CodexProcess.close()` where `start_new_session` is currently missing — matching the pattern already correct in `gitrunner.py`
-- [ ] **PROC-04**: The engine's process-lifetime guardian (`engine/process_lifetime.py::arm_process_lifetime`) has a POSIX/macOS adapter that reproduces the Windows Job Object guardian's guarantees — engine startup succeeds on macOS, and both normal engine exit and parent process death cause the guardian to terminate the engine's full process tree and release the data-root lock only after termination completes
+- [x] **PROC-04**: The engine's process-lifetime guardian (`engine/process_lifetime.py::arm_process_lifetime`) has a POSIX/macOS adapter that reproduces the Windows Job Object guardian's guarantees — engine startup succeeds on macOS, and both normal engine exit and parent process death cause the guardian to terminate the engine's full process tree and release the data-root lock only after termination completes
 
 ### Boot Autostart
 
@@ -77,7 +77,7 @@ Filled in during roadmap creation.
 | PROC-01 | Phase 2 | Pending |
 | PROC-02 | Phase 2 | Pending |
 | PROC-03 | Phase 2 | Pending |
-| PROC-04 | Phase 2.1 | Pending |
+| PROC-04 | Phase 2.1 | Complete |
 | BOOT-01 | Phase 3 | Pending |
 | BOOT-02 | Phase 3 | Pending |
 | UI-01 | Phase 4 | Pending |
@@ -90,6 +90,7 @@ Filled in during roadmap creation.
 | VER-02 | Phase 5 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 17 total
 - Mapped to phases: 17
 - Unmapped: 0 ✓
