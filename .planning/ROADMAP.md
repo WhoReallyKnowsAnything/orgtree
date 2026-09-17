@@ -70,11 +70,11 @@ Plans:
   2. Normal engine exit and parent (desktop shell) process death both cause the guardian to terminate all descendant processes and release the root lock only after termination is confirmed — the same ordering guarantee the Windows guardian provides.
   3. The guardian's existing contract is preserved: it never imports the API, reads credentials, or dispatches a provider, and killing the guardian directly to "detach" it is still unsupported (doing so tears down its owned tree).
 
-**Plans**: 1 plan
+**Plans**: 1/1 plans executed
 
 Plans:
 
-- [ ] 02.1-01-PLAN.md — PosixTree adapter (kqueue exit-detect + ps-based enumerate/sweep), launch.py self-setpgid fix, un-skip LifetimeTests + LaunchRefusalTests (PROC-04)
+- [x] 02.1-01-PLAN.md — PosixTree adapter (kqueue exit-detect + ps-based enumerate/sweep), launch.py self-setpgid fix, un-skip LifetimeTests + LaunchRefusalTests (PROC-04)
 
 ### Phase 3: Launchd Autostart
 
