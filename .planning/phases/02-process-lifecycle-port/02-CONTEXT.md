@@ -6,7 +6,7 @@
 <domain>
 ## Phase Boundary
 
-The Python engine correctly finds, runs, monitors, and terminates provider CLI subprocesses on macOS: executable resolution (`providers.py`), liveness checks (`liveness.py`), and process-tree termination (`gitrunner.py`, `codexrun.py`, `antigravityrun.py`, `mailhub_runtime.py`). Covers PROC-01, PROC-02, PROC-03 only — no new capabilities.
+The Python engine correctly finds, runs, monitors, and terminates provider CLI subprocesses on macOS: executable resolution (`providers.py`, `supervisor.py`), liveness checks (`liveness.py`), and process-tree termination (`gitrunner.py`, `codexrun.py`, `antigravityrun.py`, `mailhub_runtime.py`, `supervisor.py`). Covers PROC-01, PROC-02, PROC-03 only — no new capabilities.
 
 </domain>
 
@@ -24,6 +24,9 @@ The Python engine correctly finds, runs, monitors, and terminates provider CLI s
 ### Termination signal strategy (PROC-03)
 - **D-05:** `gitrunner.py:36-48`'s existing POSIX branch does an immediate `os.killpg(proc.pid, signal.SIGKILL)` with no grace period — this is the pattern the roadmap explicitly says to match ("matching the pattern already correct in `gitrunner.py`"). User deferred to Claude's discretion, but the roadmap text itself already answers this.
 - **D-06 (Claude's call):** `codexrun.py::CodexProcess.close()` and `antigravityrun.py`'s termination path copy `gitrunner.py`'s exact immediate-`SIGKILL` behavior (`os.killpg(pid, signal.SIGKILL)`, no `SIGTERM`-then-wait grace period) — consistent with the existing correct pattern, with Windows `taskkill /T /F`'s equivalent forcefulness, and with what PROC-03 asks for. Both call sites also need `start_new_session=True` added to their `Popen(...)` calls first (`codexrun.py` is missing it per PROC-03; verify `antigravityrun.py`'s `Popen` at antigravityrun.py:756 has it too). — **Reversibility:** reversible (signal choice is a one-line change, not load-bearing elsewhere)
+
+### Supervisor scope expansion (PROC-03, post-research)
+- **D-07:** Research (02-RESEARCH.md) found that `supervisor.py` spawns the actual Claude Code CLI at 4 sites (lines ~183, 1234, 2401, 2430) — none pass `start_new_session=True`, and termination goes through `_wd_kill_tree`/`_reap_orphans`/bare `proc.kill()`/`proc.terminate()`, never `os.killpg()`. This is the production "stop agent" entry point (`warmpool.py:2376` `halt_kill()` → `sup._wd_kill_tree()`) for the highest-traffic provider — not named in the original phase boundary, discovered only during research. User decision: **expand PROC-03 to cover `supervisor.py`'s 4 spawn/kill sites**, matching D-06's immediate-SIGKILL-via-`os.killpg()` pattern after adding `start_new_session=True`. This is now in scope for Phase 2, alongside `codexrun.py`/`antigravityrun.py`/`mailhub_runtime.py`. — **Reversibility:** reversible (same one-line-per-site pattern as D-06, no new dependencies)
 
 ### Claude's Discretion
 All three areas above were explicitly deferred to Claude ("You decide") — see D-02, D-04, D-06 for the resulting calls and rationale. The planner and researcher should treat these as decided, not re-open them with the user.
