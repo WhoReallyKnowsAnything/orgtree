@@ -49,7 +49,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. After installing the per-user LaunchAgent plist (`~/Library/LaunchAgents/`) and logging in, the Python engine is already running without the user launching it manually — no Windows Scheduled Task or registry mechanism involved.
   2. The LaunchAgent plist validates with `plutil -lint` and installs/uninstalls cleanly via `launchctl bootstrap`/`bootout`.
   3. If macOS silently disables the LaunchAgent after a crash loop, the app detects this and prompts the user instead of failing to start with no explanation.
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 03-01-PLAN.md — Build launchagent-mac.ts: plist gen/lint/bootstrap/bootout (tracer, real round-trip), detectState() classification, remediation dialog content
+- [ ] 03-02-PLAN.md — Wire darwin autostart into app startup; reboot-survival and extended crash-loop human-check items
 
 ### Phase 4: macOS UI & OS Integration Parity
 **Goal**: Orgtree looks and behaves like a native macOS app instead of a ported Windows app.
@@ -79,6 +82,6 @@ Decimal phases appear between their surrounding integers in numeric order.
 |-------|----------------|--------|-----------|
 | 1. Packaging & Runtime Foundation | 0/TBD | Not started | - |
 | 2. Process Lifecycle Port | 0/TBD | Not started | - |
-| 3. Launchd Autostart | 0/TBD | Not started | - |
+| 3. Launchd Autostart | 0/2 | Not started | - |
 | 4. macOS UI & OS Integration Parity | 0/TBD | Not started | - |
 | 5. End-to-End Verification & Test Coverage | 0/TBD | Not started | - |
