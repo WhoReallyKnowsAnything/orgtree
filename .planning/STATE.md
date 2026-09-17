@@ -43,7 +43,7 @@ Recent trend: N/A (no plans executed yet)
 - Phase 1: AMFI enforcement on Apple Silicon blocks unsigned binaries even offline ("app is damaged" dialog) — mitigated by ad-hoc signing (`mac.identity: "-"`), but must be verified on real Apple Silicon hardware early (PKG-03).
 - Phase 1: nested unsigned binaries inside the `.app` bundle can re-trigger the AMFI failure if ad-hoc signing doesn't cover the full bundle, not just the top-level `.app`.
 - Phase 3: `openAtLogin`/LaunchAgent reliability under an unsigned build is a documented caveat, not yet a tested outcome — verify by hand.
-- UNOWNED: `arm_process_lifetime` (engine/process_lifetime.py:28-29) raises unconditionally when `os.name != "nt"`, so the Python engine cannot start on macOS at all. Called from `engine/launch.py` `main()`. Surfaced by Phase 5 research; NOT covered by the requirement wording of phases 1-4. Needs an owning phase before execution.
+- Owned by Phase 2.1 (PROC-04): `arm_process_lifetime` (engine/process_lifetime.py:28-29) raises unconditionally when `os.name != "nt"`, so the Python engine cannot start on macOS at all. Called from `engine/launch.py` `main()`. Surfaced by Phase 5 research; not covered by the requirement wording of phases 1-4. Phase 02.1 inserted between Phase 2 and Phase 3; plan and passing plan-checker verdict at `.planning/phases/02.1-engine-process-lifetime-posix-adapter-replace-the-windows-on/02.1-01-PLAN.md`.
 
 ## Session Continuity
 
