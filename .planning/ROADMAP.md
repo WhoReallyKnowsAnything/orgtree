@@ -43,7 +43,12 @@ Plans:
   1. The engine locates and launches Claude Code, Codex, and Antigravity CLIs from their real macOS install paths (npm shims, Antigravity's own install location) via `shutil.which()`.
   2. The engine's liveness check correctly reports whether a provider process is alive or dead on macOS, matching real process state (`os.kill(pid, 0)` verified against actual macOS behavior).
   3. Stopping an agent kills the provider CLI and all of its descendant processes on macOS — including `codexrun.py`'s process, once it spawns with `start_new_session` like `gitrunner.py` already does — leaving no orphaned processes.
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — codexrun.py + antigravityrun.py: start_new_session spawn + os.killpg termination (PROC-03)
+- [ ] 02-02-PLAN.md — supervisor.py (4 spawn sites + _wd_kill_tree) + mailhub_runtime.py orphan reclaim (PROC-03, D-07 scope)
+- [ ] 02-03-PLAN.md — PROC-01/PROC-02 verification: mocked-path resolver tests + liveness confirmation
 
 ### Phase 3: Launchd Autostart
 **Goal**: The engine starts automatically at login on macOS, and the user is alerted if that autostart silently stops working.
