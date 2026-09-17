@@ -23,14 +23,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-17)
 
 **Core value:** The app runs and works correctly on macOS: build, launch, spawn agents, and manage their work end-to-end — matching what the Windows build already does.
-**Current focus:** All 5 phases planned — Phase 1 next to execute
+**Current focus:** Phase 1 partially executed — PKG-03 blocked, paused 2026-09-17
 
 ## Current Position
 
 Phase: 1 of 5 (Packaging & Runtime Foundation)
 Plan: 1 of 3 in current phase (12 plans total across phases 1-5)
-Status: All 5 phases planned and merged to main; none executed yet
-Last activity: 2026-09-17 — phases 1-5 planned in parallel worktrees and merged to main. Plan counts: P1 3, P2 3, P3 2, P4 2, P5 2. All plan-checker verdicts pass. Requirement coverage confirmed across PKG/RUN, PROC, BOOT, UI/UPD, VER.
+Status: Phases 1 and 02.1 executed (Phase 1 INCOMPLETE — PKG-03 fails); phases 2, 3, 4, 5 planned, not started
+Last activity: 2026-09-17 — Phase 1 executed except PKG-03. RUN-01 met (macOS runtime provisioned, staged, and resolved at launch; engine verified starting on Apple Silicon with a live child tree). PKG-02 met (orgtree-eye.icns renders, confirmed visually). PKG-01 partial: the .app and nested bin/python3.13 are ad-hoc signed, but the bundle fails codesign --verify --strict. PKG-03 NOT met — see Blockers. Paused here at WhoReallyKnowsAnything's request.
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -57,14 +57,15 @@ Recent trend: N/A (no plans executed yet)
 - Phase 1: nested unsigned binaries inside the `.app` bundle can re-trigger the AMFI failure if ad-hoc signing doesn't cover the full bundle, not just the top-level `.app`.
 - Phase 3: `openAtLogin`/LaunchAgent reliability under an unsigned build is a documented caveat, not yet a tested outcome — verify by hand.
 - ~~Owned by Phase 2.1 (PROC-04): `arm_process_lifetime` raises unconditionally when `os.name != "nt"`~~ — RESOLVED 2026-09-17 by 02.1-01-PLAN.md (commits `30dec80`/`fbc9fc4`/`4af4984` on `session/execute-phase-2-1-engine-process-lifetim`): `PosixTree` adapter implemented, `engine/launch.py::main()` self-setpgids, `LifetimeTests`/`LaunchRefusalTests` un-skipped and passing on macOS. Residual gap (NOT resolved): a descendant in its own escaped process group is only provably swept when the guardian's teardown runs while the engine is still alive — see `02.1-01-SUMMARY.md` Threat Flags and `.planning/WINDOWS.md` entry #1.
+- **OPEN (PKG-03, blocks Phase 1 closure): the packaged `.app` fails `codesign --verify --deep --strict` with "a sealed resource is missing or invalid".** Cause: running the app writes `__pycache__/*.cpython-313.pyc` files into `Contents/Resources/engine/` AFTER signing, so the bundle no longer matches its seal. Confirmed 2026-09-17 on real Apple Silicon: a quarantined copy produces the unrecoverable "Orgtree.app is damaged and can't be opened" dialog (Cancel / Move to Bin only), NOT the recoverable "developer cannot be verified" Gatekeeper dialog that `docs/macos-first-launch.md` documents. The original build in the worktree fails verification identically, so this is not copy corruption. This would break the first launch of any installed copy, not just this test. Fix needs two parts: (1) keep bytecode out of the bundle — `PYTHONDONTWRITEBYTECODE=1`/`-B` for the packaged engine, or pre-compile and seal `.pyc` at build time, or exclude `__pycache__` in electron-builder's file rules; (2) ordering — any verification that RUNS the app must happen before signing, or be followed by a re-sign. NOTE the verification trap that hid this: `codesign -dv` only shows a signature EXISTS; only `codesign --verify --strict` proves it is VALID. Phase 1's checks used `-dv`.
 
 ## Session Continuity
 
-**Stopped at:** Completed 02.1-01-PLAN.md
+**Stopped at:** Phase 1 paused mid-execution 2026-09-17 — PKG-03 unresolved (see Blockers). WhoReallyKnowsAnything to pick up later.
 
 Last session: 2026-09-17T18:59:05.793Z
-Last completed: Planning for all 5 phases (12 plans), merged to main.
-Resume file: None
+Last completed: Phase 02.1 execution, and Phase 1 execution except PKG-03.
+Resume file: None — resume by fixing the PKG-03 `__pycache__` seal-invalidation blocker above, then re-running the Gatekeeper quarantine check. `01-03-SUMMARY.md` was deliberately never written, so Phase 1 is not closed.
 
 ## Decisions
 
