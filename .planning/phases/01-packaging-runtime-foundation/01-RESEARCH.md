@@ -267,14 +267,14 @@ See `Architecture Patterns` above for the three load-bearing examples (`afterPac
 
 **Note:** Corrections A1 and the STACK.md Python-version discrepancy (Pitfall 3) are not `[ASSUMED]` — they are `[VERIFIED]` against `tools/provision-runtime.py` directly and supersede the earlier `.planning/research/STACK.md` draft finding.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Does the project want a `dmg` artifact at all for a purely local/dev build, or is `zip`/`--dir` sufficient?**
+1. **Does the project want a `dmg` artifact at all for a purely local/dev build, or is `zip`/`--dir` sufficient?** — RESOLVED in 01-03-PLAN.md Task 1: adds both `package:mac:dir` (fast, `electron-builder --mac --dir`) and `package:mac` (dmg+zip), mirroring the existing `package:dir`/`package:win` pair.
    - What we know: `mac.target` defaults to `["zip", "dmg"]` if unspecified; both are cheap to produce.
    - What's unclear: Whether `npm run package:mac` should mirror `package:win` (full installer-style artifact) or `package:dir` (fastest iteration, no compression step) as its primary dev workflow.
    - Recommendation: Add both a `package:mac:dir` (fast, `electron-builder --mac --dir`) and `package:mac` (dmg+zip) script, mirroring the existing `package:dir`/`package:win` pair.
 
-2. **Should the x64 (Intel) build be validated in Phase 1, or deferred given the dev machine is Apple Silicon?**
+2. **Should the x64 (Intel) build be validated in Phase 1, or deferred given the dev machine is Apple Silicon?** — RESOLVED in 01-03-PLAN.md Task 1 + Task 4: primary build target is arm64-only (avoids the `extraResources` wrong-arch bug); x64 is a documented separate re-provision-then-`package:mac:x64` path, with real-hardware verification deferred to Task 4's checkpoint per PKG-03.
    - What we know: python-build-standalone ships `x86_64-apple-darwin` tarballs; electron-builder can cross-build a `x64` artifact from an `arm64` host.
    - What's unclear: Whether the smoke-import step in `provision-runtime.py` (which must *execute* the target interpreter) can run for a foreign arch without Rosetta 2, and whether Rosetta is installed/available for CI or dev-machine verification.
    - Recommendation: Build both archs, but only require the smoke-import test to pass for the arch matching the build host (`arm64` here); document the x64 path as needing verification on real Intel hardware or via Rosetta, consistent with PKG-03's "verify on real hardware" framing already in REQUIREMENTS.md.
