@@ -29,7 +29,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. The app's Dock and Finder icon displays as the real Orgtree icon, not a blank or default icon, because a `.icns` (generated via `iconutil`) is bundled instead of the Windows-only `.ico`.
   3. A first-time user who hits the Gatekeeper block on double-click can follow documented steps (right-click → Open, or System Settings approval) to launch the app successfully — verified by hand on real Apple Silicon hardware.
   4. `tools/provision-runtime.py` downloads and stages an arch-correct (`aarch64`/`x86_64`) `python-build-standalone` runtime into the build instead of hard-exiting on non-`win32`.
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 01-01-PLAN.md — macOS runtime provisioning and layout verification (RUN-01)
+- [ ] 01-02-PLAN.md — .icns icon generation (PKG-02)
+- [ ] 01-03-PLAN.md — electron-builder mac target, ad-hoc signing, Gatekeeper docs (PKG-01, PKG-03)
 
 ### Phase 2: Process Lifecycle Port
 **Goal**: The Python engine correctly finds, runs, monitors, and terminates provider CLI subprocesses on macOS.
