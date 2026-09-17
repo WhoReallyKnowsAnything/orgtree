@@ -61,7 +61,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Orgtree has a native macOS app menu in the menu bar, where none exists today.
   4. The Dock badge count and the menu-bar tray icon both reflect live app state — pending tickets/mail via `app.setBadgeCount()`, and light/dark appearance via a Template tray image.
   5. The user sees a "new version available" notice when a newer release exists, without the app attempting to auto-apply the update.
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 04-01-PLAN.md — Mac update notice end-to-end (bridge platform flag, openReleasePage IPC, tray mirror) + Dock bounce/badge sharing one identity set (UPD-01, UI-01, UI-04)
+- [ ] 04-02-PLAN.md — Window lifecycle recreate-on-show, native App menu, tray Template icon (UI-02, UI-03, UI-05)
 **UI hint**: yes
 
 ### Phase 5: End-to-End Verification & Test Coverage
