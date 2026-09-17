@@ -69,28 +69,28 @@ Filled in during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PKG-01 | TBD | Pending |
-| PKG-02 | TBD | Pending |
-| PKG-03 | TBD | Pending |
-| RUN-01 | TBD | Pending |
-| PROC-01 | TBD | Pending |
-| PROC-02 | TBD | Pending |
-| PROC-03 | TBD | Pending |
-| BOOT-01 | TBD | Pending |
-| BOOT-02 | TBD | Pending |
-| UI-01 | TBD | Pending |
-| UI-02 | TBD | Pending |
-| UI-03 | TBD | Pending |
-| UI-04 | TBD | Pending |
-| UI-05 | TBD | Pending |
-| UPD-01 | TBD | Pending |
-| VER-01 | TBD | Pending |
-| VER-02 | TBD | Pending |
+| PKG-01 | Phase 1 | Pending |
+| PKG-02 | Phase 1 | Pending |
+| PKG-03 | Phase 1 | Pending |
+| RUN-01 | Phase 1 | Pending |
+| PROC-01 | Phase 2 | Pending |
+| PROC-02 | Phase 2 | Pending |
+| PROC-03 | Phase 2 | Pending |
+| BOOT-01 | Phase 3 | Pending |
+| BOOT-02 | Phase 3 | Pending |
+| UI-01 | Phase 4 | Pending |
+| UI-02 | Phase 4 | Pending |
+| UI-03 | Phase 4 | Pending |
+| UI-04 | Phase 4 | Pending |
+| UI-05 | Phase 4 | Pending |
+| UPD-01 | Phase 4 | Pending |
+| VER-01 | Phase 5 | Pending |
+| VER-02 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 17 total
-- Mapped to phases: 0
-- Unmapped: 17 ⚠️ (resolved by roadmap creation)
+- Mapped to phases: 17
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-09-17*
