@@ -71,7 +71,10 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Success Criteria** (what must be TRUE):
   1. A user can package, launch, and run a full agent job on macOS — spawn an agent, watch it do real work, and see the result land back in Orgtree — with no manual workarounds.
   2. Test runs on macOS exercise the scenarios that were previously Windows-only skips (installer, elevation-equivalent, taskbar/dock probes, `test_service_host.py`) instead of silently skipping them.
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 05-01-PLAN.md — Real end-to-end agent-turn acceptance runner + process-lifecycle pre-flight gate (VER-01)
+- [ ] 05-02-PLAN.md — POSIX descriptor-protection fix + macOS test-skip coverage closure (VER-02)
 
 ## Progress
 
