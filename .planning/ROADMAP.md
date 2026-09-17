@@ -32,8 +32,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. The app's Dock and Finder icon displays as the real Orgtree icon, not a blank or default icon, because a `.icns` (generated via `iconutil`) is bundled instead of the Windows-only `.ico`.
   3. A first-time user who hits the Gatekeeper block on double-click can follow documented steps (right-click → Open, or System Settings approval) to launch the app successfully — verified by hand on real Apple Silicon hardware.
   4. `tools/provision-runtime.py` downloads and stages an arch-correct (`aarch64`/`x86_64`) `python-build-standalone` runtime into the build instead of hard-exiting on non-`win32`.
+
 **Plans**: 3 plans
 Plans:
+
 - [ ] 01-01-PLAN.md — macOS runtime provisioning and layout verification (RUN-01)
 - [ ] 01-02-PLAN.md — .icns icon generation (PKG-02)
 - [ ] 01-03-PLAN.md — electron-builder mac target, ad-hoc signing, Gatekeeper docs (PKG-01, PKG-03)
@@ -48,12 +50,31 @@ Plans:
   1. The engine locates and launches Claude Code, Codex, and Antigravity CLIs from their real macOS install paths (npm shims, Antigravity's own install location) via `shutil.which()`.
   2. The engine's liveness check correctly reports whether a provider process is alive or dead on macOS, matching real process state (`os.kill(pid, 0)` verified against actual macOS behavior).
   3. Stopping an agent kills the provider CLI and all of its descendant processes on macOS — including `codexrun.py`'s process, once it spawns with `start_new_session` like `gitrunner.py` already does — leaving no orphaned processes.
+
 **Plans**: 3 plans
 
 Plans:
+
 - [ ] 02-01-PLAN.md — codexrun.py + antigravityrun.py: start_new_session spawn + os.killpg termination (PROC-03)
 - [ ] 02-02-PLAN.md — supervisor.py (4 spawn sites + _wd_kill_tree) + mailhub_runtime.py orphan reclaim (PROC-03, D-07 scope)
 - [ ] 02-03-PLAN.md — PROC-01/PROC-02 verification: mocked-path resolver tests + liveness confirmation
+
+### Phase 02.1: Engine Process Lifetime POSIX Adapter (INSERTED)
+
+**Goal**: The Python engine's process-lifetime guardian owns the engine's process tree and data-root lock on macOS (POSIX), reproducing the teardown guarantees of the existing Windows Job Object guardian, so the engine can start and run on macOS.
+**Depends on**: Phase 2
+**Requirements**: PROC-04
+**Success Criteria** (what must be TRUE):
+
+  1. `arm_process_lifetime()` succeeds on macOS (no `RuntimeError`) and returns a live guardian PID that owns the engine's process tree, matching `engine/launch.py`'s existing call site.
+  2. Normal engine exit and parent (desktop shell) process death both cause the guardian to terminate all descendant processes and release the root lock only after termination is confirmed — the same ordering guarantee the Windows guardian provides.
+  3. The guardian's existing contract is preserved: it never imports the API, reads credentials, or dispatches a provider, and killing the guardian directly to "detach" it is still unsupported (doing so tears down its owned tree).
+
+**Plans**: 1 plan
+
+Plans:
+
+- [ ] 02.1-01-PLAN.md — PosixTree adapter (kqueue exit-detect + ps-based enumerate/sweep), launch.py self-setpgid fix, un-skip LifetimeTests + LaunchRefusalTests (PROC-04)
 
 ### Phase 3: Launchd Autostart
 
@@ -88,10 +109,13 @@ Plans:
   3. Orgtree has a native macOS app menu in the menu bar, where none exists today.
   4. The Dock badge count and the menu-bar tray icon both reflect live app state — pending tickets/mail via `app.setBadgeCount()`, and light/dark appearance via a Template tray image.
   5. The user sees a "new version available" notice when a newer release exists, without the app attempting to auto-apply the update.
+
 **Plans:** 2 plans
 Plans:
+
 - [ ] 04-01-PLAN.md — Mac update notice end-to-end (bridge platform flag, openReleasePage IPC, tray mirror) + Dock bounce/badge sharing one identity set (UPD-01, UI-01, UI-04)
 - [ ] 04-02-PLAN.md — Window lifecycle recreate-on-show, native App menu, tray Template icon (UI-02, UI-03, UI-05)
+
 **UI hint**: yes
 
 ### Phase 5: End-to-End Verification & Test Coverage
@@ -103,8 +127,10 @@ Plans:
 
   1. A user can package, launch, and run a full agent job on macOS — spawn an agent, watch it do real work, and see the result land back in Orgtree — with no manual workarounds.
   2. Test runs on macOS exercise the scenarios that were previously Windows-only skips (installer, elevation-equivalent, taskbar/dock probes, `test_service_host.py`) instead of silently skipping them.
+
 **Plans**: 2 plans
 Plans:
+
 - [ ] 05-01-PLAN.md — Real end-to-end agent-turn acceptance runner + process-lifecycle pre-flight gate (VER-01)
 - [ ] 05-02-PLAN.md — POSIX descriptor-protection fix + macOS test-skip coverage closure (VER-02)
 
