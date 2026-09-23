@@ -87,15 +87,15 @@ Plans:
   2. The LaunchAgent plist validates with `plutil -lint` and installs/uninstalls cleanly via `launchctl bootstrap`/`bootout`.
   3. If macOS silently disables the LaunchAgent after a crash loop, the app detects this and prompts the user instead of failing to start with no explanation.
 
-**Plans**: 2 plans
+**Plans**: 2/2 plans executed
 Plans:
 **Wave 1**
 
-- [ ] 03-01-PLAN.md — Build launchagent-mac.ts: plist gen/lint/bootstrap/bootout (tracer, real round-trip), detectState() classification, remediation dialog content
+- [x] 03-01-PLAN.md — Build launchagent-mac.ts: plist gen/lint/bootstrap/bootout (tracer, real round-trip), detectState() classification, remediation dialog content
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 03-02-PLAN.md — Wire darwin autostart into app startup; reboot-survival and extended crash-loop human-check items
+- [x] 03-02-PLAN.md — Wire darwin autostart into app startup; reboot-survival and extended crash-loop human-check items
 
 ### Phase 4: macOS UI & OS Integration Parity
 
@@ -140,6 +140,6 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Packaging & Runtime Foundation | 0/TBD | Not started | - |
 | 2. Process Lifecycle Port | 3/3 | Complete    | 2026-09-23 |
-| 3. Launchd Autostart | 0/2 | Not started | - |
+| 3. Launchd Autostart | 2/2 | In Progress|  |
 | 4. macOS UI & OS Integration Parity | 0/TBD | Not started | - |
 | 5. End-to-End Verification & Test Coverage | 0/TBD | Not started | - |

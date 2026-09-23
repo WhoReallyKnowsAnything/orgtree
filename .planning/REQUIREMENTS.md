@@ -24,8 +24,8 @@
 
 ### Boot Autostart
 
-- [ ] **BOOT-01**: Engine autostart on login is implemented via a per-user `launchd` LaunchAgent plist (`~/Library/LaunchAgents/`), replacing the Windows Scheduled Task + registry mechanism
-- [ ] **BOOT-02**: App detects and surfaces to the user when macOS has silently disabled the LaunchAgent after a crash loop (no programmatic re-enable exists — must prompt, not fail silently)
+- [x] **BOOT-01**: Engine autostart on login is implemented via a per-user `launchd` LaunchAgent plist (`~/Library/LaunchAgents/`), replacing the Windows Scheduled Task + registry mechanism
+- [x] **BOOT-02**: App detects and surfaces to the user when macOS has silently disabled the LaunchAgent after a crash loop (no programmatic re-enable exists — must prompt, not fail silently)
 
 ### macOS UI Parity
 
@@ -78,8 +78,8 @@ Filled in during roadmap creation.
 | PROC-02 | Phase 2 | Complete |
 | PROC-03 | Phase 2 | Complete |
 | PROC-04 | Phase 2.1 | Complete |
-| BOOT-01 | Phase 3 | Pending |
-| BOOT-02 | Phase 3 | Pending |
+| BOOT-01 | Phase 3 | Complete |
+| BOOT-02 | Phase 3 | Complete |
 | UI-01 | Phase 4 | Complete |
 | UI-02 | Phase 4 | Pending |
 | UI-03 | Phase 4 | Pending |
