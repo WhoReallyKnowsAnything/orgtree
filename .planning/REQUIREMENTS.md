@@ -29,15 +29,15 @@
 
 ### macOS UI Parity
 
-- [ ] **UI-01**: Cross-org "attention" signal (currently Windows `flashFrame`) uses `app.dock.bounce('critical')` on macOS
+- [x] **UI-01**: Cross-org "attention" signal (currently Windows `flashFrame`) uses `app.dock.bounce('critical')` on macOS
 - [ ] **UI-02**: Window lifecycle follows macOS convention (`window-all-closed` doesn't quit the app; `activate` reopens the window) — currently only Windows-style close-quits-app behavior exists
 - [ ] **UI-03**: App has a native macOS app menu (currently none — Windows relies on the OS-provided menu bar behavior)
-- [ ] **UI-04**: Dock badge count reflects pending tickets/mail via `app.setBadgeCount()`
+- [x] **UI-04**: Dock badge count reflects pending tickets/mail via `app.setBadgeCount()`
 - [ ] **UI-05**: Tray icon uses a Template image so it adapts to light/dark macOS menu bar
 
 ### Update Notice
 
-- [ ] **UPD-01**: App shows a "new version available" notice (version-check only, no auto-apply) — full auto-update via `electron-updater`/Squirrel.Mac is blocked by code-signing requirements this project doesn't meet
+- [x] **UPD-01**: App shows a "new version available" notice (version-check only, no auto-apply) — full auto-update via `electron-updater`/Squirrel.Mac is blocked by code-signing requirements this project doesn't meet
 
 ### Verification
 
@@ -80,12 +80,12 @@ Filled in during roadmap creation.
 | PROC-04 | Phase 2.1 | Complete |
 | BOOT-01 | Phase 3 | Pending |
 | BOOT-02 | Phase 3 | Pending |
-| UI-01 | Phase 4 | Pending |
+| UI-01 | Phase 4 | Complete |
 | UI-02 | Phase 4 | Pending |
 | UI-03 | Phase 4 | Pending |
-| UI-04 | Phase 4 | Pending |
+| UI-04 | Phase 4 | Complete |
 | UI-05 | Phase 4 | Pending |
-| UPD-01 | Phase 4 | Pending |
+| UPD-01 | Phase 4 | Complete |
 | VER-01 | Phase 5 | Pending |
 | VER-02 | Phase 5 | Pending |
 
