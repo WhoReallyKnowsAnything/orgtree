@@ -42,7 +42,7 @@
 ### Verification
 
 - [ ] **VER-01**: Packaged unsigned `.app` builds, launches, and completes a real end-to-end agent job on macOS (spawn agent → agent does work → result lands back in orgtree)
-- [ ] **VER-02**: Windows-only test suite (installer/elevation/taskbar probes, `test_service_host.py` Windows-only skips) gets macOS counterparts so mac-specific logic has real coverage instead of silent skips
+- [x] **VER-02**: Windows-only test suite (installer/elevation/taskbar probes, `test_service_host.py` Windows-only skips) gets macOS counterparts so mac-specific logic has real coverage instead of silent skips
 
 ## v2 Requirements
 
@@ -87,7 +87,7 @@ Filled in during roadmap creation.
 | UI-05 | Phase 4 | Complete |
 | UPD-01 | Phase 4 | Complete |
 | VER-01 | Phase 5 | Pending |
-| VER-02 | Phase 5 | Pending |
+| VER-02 | Phase 5 | Complete |
 
 **Coverage:**
 

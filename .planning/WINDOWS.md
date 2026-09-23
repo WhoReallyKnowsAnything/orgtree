@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 3
+open_count: 4
 waived_count: 0
 fixed_count: 0
-total_count: 3
-last_updated: 2026-09-23T10:17:01.689Z
+total_count: 4
+last_updated: 2026-09-23T13:36:27.468Z
 ---
 
 # Broken Windows Ledger
@@ -18,6 +18,7 @@ last_updated: 2026-09-23T10:17:01.689Z
 | 1 | 02.1 | deviation | engine/process_lifetime.py |  | PosixTree.terminate() only provably sweeps a descendant in its own escaped process group (start_new_session=True, e.g. a provider CLI) when the guardian's sweep runs while the engine is still alive (parent-death or guardian-crash teardown). Once the engine itself exits or crashes first, the kernel reparents the escaped-group descendant away before the sweep enumerates, and it survives - a real gap against ROADMAP Phase 02.1 success criterion 2 for the common normal-exit path. | open |  | 2026-09-17T18:54:34.450Z |  |
 | 2 | 02 | deviation | tests/ |  | unittest discover -s tests -p 'test_*.py' shows pre-existing cross-test DATA_ROOT-binds-at-import-time contamination + Windows-path assertions on macOS (91 fail/478 err) unrelated to 02-01's or 02-02's changes; named regression-guard files pass in isolation in both plans. See phases/02-process-lifecycle-port/deferred-items.md | open |  | 2026-09-23T10:17:01.689Z |  |
 | 3 | 02 | deviation | engine/mailhub_runtime.py |  | tests/test_mailhub_runtime.py: 6 failures pre-existing, caused by uninitialized engine/mailhub git submodule in this worktree; confirmed present against unmodified file too. See deferred-items.md | open |  | 2026-09-23T10:03:03.615Z |  |
+| 4 | 05 | deviation | engine/process_lifetime.py |  | RootLock's fcntl release after a failed-start guardian teardown is not proven immediate on POSIX (test_startup_progress.py::BootStartupTests::test_silence_and_duplicate_progress_fail_with_proven_release fails with BlockingIOError on no-retry re-acquire); happy-path boot already works on POSIX | open |  | 2026-09-23T13:36:27.468Z |  |
 
 ````json
 [
@@ -55,6 +56,18 @@ last_updated: 2026-09-23T10:17:01.689Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-09-23T10:03:03.615Z",
+    "resolved_at": null
+  },
+  {
+    "id": 4,
+    "kind": "deviation",
+    "phase": "05",
+    "file": "engine/process_lifetime.py",
+    "line": null,
+    "description": "RootLock's fcntl release after a failed-start guardian teardown is not proven immediate on POSIX (test_startup_progress.py::BootStartupTests::test_silence_and_duplicate_progress_fail_with_proven_release fails with BlockingIOError on no-retry re-acquire); happy-path boot already works on POSIX",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-23T13:36:27.468Z",
     "resolved_at": null
   }
 ]

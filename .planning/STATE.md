@@ -4,16 +4,16 @@ current_phase: 3
 current_phase_name: Launchd Autostart
 current_plan: 2 of 2
 status: plan-complete
-stopped_at: Completed 03-02-PLAN.md
-last_updated: "2026-09-23T11:31:28.326Z"
+stopped_at: Completed 05-02-PLAN.md
+last_updated: "2026-09-23T13:36:42.258Z"
 last_activity: 2026-09-23
 last_activity_desc: Phase 3 Plan 02 complete (darwin autostart wired into app startup)
-state_head: eb2cea2383ec2f74523db22bfccb432c00611cea
+state_head: f8f3115032a29febaabed373605af5c6f16a0df2
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 13
-  completed_plans: 10
+  completed_plans: 12
   percent: 17
 ---
 
@@ -50,6 +50,7 @@ Recent trend: N/A (no plans executed yet)
 | Phase 02 P02 | 23min | 2 tasks | 6 files |
 | Phase 02 P03 | 12min | 2 tasks | 1 files |
 | Phase 03 P02 | 12m | 2 tasks | 1 files |
+| Phase 05 P02 | 32min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -67,9 +68,9 @@ Recent trend: N/A (no plans executed yet)
 
 ## Session Continuity
 
-**Stopped at:** Completed 03-02-PLAN.md
+**Stopped at:** Completed 05-02-PLAN.md
 
-Last session: 2026-09-23T11:30:06.963Z
+Last session: 2026-09-23T13:36:42.187Z
 Last completed: Phase 1 closed — PKG-03 code fix (both spawn sites), verification-trap doc/plan cleanup, and Task 4's real-hardware human checkpoint (PASS), all this session. Phase 02.1 execution and Phase 1 Tasks 1-3 completed 2026-09-17.
 Resume file: None
 
@@ -82,3 +83,4 @@ Resume file: None
 - [Phase 02]: 02-03: verification-only — no RED/GREEN split; a single test(...) commit both wrote and green-lit the precedence-order proof since no production code changes were permitted
 - [Phase 3]: 03-02: Task 1 needed no code change — 03-01 had already verified resolveMacEnginePythonPath's interpreter subpath against Phase 1's real packaged output (engine.ts:77-79 / 01-01-SUMMARY.md:50).
 - [Phase 3]: 03-02: darwin autostart block inserted immediately after the engine attach/start success point (structural position), not the plan's stale absolute line numbers — file had shifted ~28 lines from concurrent phase work.
+- [Phase 3]: 05-02: POSIX descriptor-protection implemented in service_host.py; 3 of 4 Windows-only test-skip 'blockers' the plan cited turned out stale on source inspection (guardian, kill-tree, and readiness class already work on POSIX) — dispositions corrected accordingly
