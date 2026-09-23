@@ -30,10 +30,10 @@
 ### macOS UI Parity
 
 - [x] **UI-01**: Cross-org "attention" signal (currently Windows `flashFrame`) uses `app.dock.bounce('critical')` on macOS
-- [ ] **UI-02**: Window lifecycle follows macOS convention (`window-all-closed` doesn't quit the app; `activate` reopens the window) — currently only Windows-style close-quits-app behavior exists
-- [ ] **UI-03**: App has a native macOS app menu (currently none — Windows relies on the OS-provided menu bar behavior)
+- [x] **UI-02**: Window lifecycle follows macOS convention (`window-all-closed` doesn't quit the app; `activate` reopens the window) — currently only Windows-style close-quits-app behavior exists
+- [x] **UI-03**: App has a native macOS app menu (currently none — Windows relies on the OS-provided menu bar behavior)
 - [x] **UI-04**: Dock badge count reflects pending tickets/mail via `app.setBadgeCount()`
-- [ ] **UI-05**: Tray icon uses a Template image so it adapts to light/dark macOS menu bar
+- [x] **UI-05**: Tray icon uses a Template image so it adapts to light/dark macOS menu bar
 
 ### Update Notice
 
@@ -81,10 +81,10 @@ Filled in during roadmap creation.
 | BOOT-01 | Phase 3 | Complete |
 | BOOT-02 | Phase 3 | Complete |
 | UI-01 | Phase 4 | Complete |
-| UI-02 | Phase 4 | Pending |
-| UI-03 | Phase 4 | Pending |
+| UI-02 | Phase 4 | Complete |
+| UI-03 | Phase 4 | Complete |
 | UI-04 | Phase 4 | Complete |
-| UI-05 | Phase 4 | Pending |
+| UI-05 | Phase 4 | Complete |
 | UPD-01 | Phase 4 | Complete |
 | VER-01 | Phase 5 | Pending |
 | VER-02 | Phase 5 | Pending |
