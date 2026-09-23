@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 1
 current_phase_name: Packaging & Runtime Foundation
 status: planning
-stopped_at: Phase 1 complete (01-03-SUMMARY.md); ready to plan Phase 2
-last_updated: "2026-09-23T09:16:10.000Z"
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-09-23T10:15:37.267Z"
 last_activity: 2026-09-23
 last_activity_desc: "Resumed and closed Phase 1: fixed PKG-03 (PYTHONDONTWRITEBYTECODE=1 in both the packaged engine spawn and its guardian subprocess env — two independent bytecode-write sites broke the code signature seal on launch), verified via a real package:mac:dir build (codesign --verify --deep --strict clean before and after a full engine+guardian launch cycle), then the user ran Task 4's real-hardware Gatekeeper checkpoint on Apple Silicon: PASS. 01-03-SUMMARY.md written, status complete."
-state_head: 4af4984ea27c3e90cbb145bda5d5fff13eef9583
+state_head: 18eae938ad461f0af0609f68f7bb0f13afa1e47a
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 13
-  completed_plans: 1
+  completed_plans: 5
   percent: 0
 ---
 
@@ -44,6 +44,7 @@ Recent trend: N/A (no plans executed yet)
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 02.1 P01 | 50min | 3 tasks | 4 files |
+| Phase 02 P02 | 23min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -61,13 +62,14 @@ Recent trend: N/A (no plans executed yet)
 
 ## Session Continuity
 
-**Stopped at:** Phase 1 complete. Next: plan Phase 2 (process lifecycle), e.g. via `/gsd-plan-phase 2` or `/gsd-next`.
+**Stopped at:** Completed 02-02-PLAN.md
 
-Last session: 2026-09-23T09:16:10.000Z
+Last session: 2026-09-23T10:15:37.253Z
 Last completed: Phase 1 closed — PKG-03 code fix (both spawn sites), verification-trap doc/plan cleanup, and Task 4's real-hardware human checkpoint (PASS), all this session. Phase 02.1 execution and Phase 1 Tasks 1-3 completed 2026-09-17.
-Resume file: `01-03-SUMMARY.md` (status: complete). No open items block Phase 2 start; Intel/x64 verification remains a documented, non-blocking follow-up.
+Resume file: None
 
 ## Decisions
 
 - [Phase 1]: PosixTree adapter mirrors WindowsTree's exact public surface; kqueue EVFILT_PROC/NOTE_EXIT for exit detection, ps-based enumerate-then-killpg sweep for teardown
 - [Phase 1]: Escaped-process-group descendants are only provably swept when the guardian's teardown runs while the engine is still alive (parent-death/guardian-crash); the engine-dies-first case has a documented residual gap (see 02.1-01-SUMMARY.md Threat Flags)
+- [Phase 1]: supervisor.py + mailhub_runtime.py POSIX process-tree containment: applied gitrunner.py's start_new_session/os.killpg pattern verbatim at both fix sites, fixed _wd_kill_tree() once at the shared chokepoint
