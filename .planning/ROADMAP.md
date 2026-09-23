@@ -128,10 +128,10 @@ Plans:
   1. A user can package, launch, and run a full agent job on macOS — spawn an agent, watch it do real work, and see the result land back in Orgtree — with no manual workarounds.
   2. Test runs on macOS exercise the scenarios that were previously Windows-only skips (installer, elevation-equivalent, taskbar/dock probes, `test_service_host.py`) instead of silently skipping them.
 
-**Plans**: 2 plans
+**Plans**: 1/2 plans executed
 Plans:
 
-- [ ] 05-01-PLAN.md — Real end-to-end agent-turn acceptance runner + process-lifecycle pre-flight gate (VER-01)
+- [x] 05-01-PLAN.md — Real end-to-end agent-turn acceptance runner + process-lifecycle pre-flight gate (VER-01)
 - [ ] 05-02-PLAN.md — POSIX descriptor-protection fix + macOS test-skip coverage closure (VER-02)
 
 ## Progress
@@ -142,4 +142,4 @@ Plans:
 | 2. Process Lifecycle Port | 3/3 | Complete    | 2026-09-23 |
 | 3. Launchd Autostart | 2/2 | In Progress|  |
 | 4. macOS UI & OS Integration Parity | 0/TBD | Not started | - |
-| 5. End-to-End Verification & Test Coverage | 0/TBD | Not started | - |
+| 5. End-to-End Verification & Test Coverage | 1/2 | In Progress|  |
