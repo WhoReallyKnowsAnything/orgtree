@@ -14,7 +14,8 @@ Orgtree currently only runs on Windows: NSIS packaging, a Scheduled Task for boo
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Packaging & Runtime Foundation** - Produce a launchable, ad-hoc-signed macOS `.app` with a bundled Python runtime and `.icns` icon
-- [x] **Phase 2: Process Lifecycle Port** - Port provider CLI resolution, liveness checks, and process-tree termination to POSIX (completed 2026-09-23)
+- [x] **Phase 2: Process Lifecycle Port** - Port provider CLI resolution, liveness checks, and process-tree termination to POSIX
+ (completed 2026-09-23)
 - [ ] **Phase 3: Launchd Autostart** - Replace the Windows Scheduled Task with a `launchd` LaunchAgent, with crash-loop detection
 - [ ] **Phase 4: macOS UI & OS Integration Parity** - Dock/menu/tray behavior and update notices match native macOS conventions
 - [ ] **Phase 5: End-to-End Verification & Test Coverage** - Prove a real agent job runs on macOS and close the Windows-only test gaps
@@ -132,7 +133,7 @@ Plans:
 Plans:
 
 - [x] 05-01-PLAN.md — Real end-to-end agent-turn acceptance runner + process-lifecycle pre-flight gate (VER-01)
-- [ ] 05-02-PLAN.md — POSIX descriptor-protection fix + macOS test-skip coverage closure (VER-02)
+- [x] 05-02-PLAN.md — POSIX descriptor-protection fix + macOS test-skip coverage closure (VER-02)
 
 ## Progress
 

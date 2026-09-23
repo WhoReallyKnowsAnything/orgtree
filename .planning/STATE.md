@@ -4,11 +4,11 @@ current_phase: 3
 current_phase_name: Launchd Autostart
 current_plan: 2 of 2
 status: plan-complete
-stopped_at: Completed 05-01-PLAN.md
-last_updated: "2026-09-23T13:35:43.980Z"
+stopped_at: Completed 05-01-PLAN.md and 05-02-PLAN.md
+last_updated: "2026-09-23T13:36:42.258Z"
 last_activity: 2026-09-23
 last_activity_desc: Phase 3 Plan 02 complete (darwin autostart wired into app startup)
-state_head: 13f4acdc6eec52830779b5faf7a32f8f508e287c
+state_head: 8ac3493c34ac578a2bd965e3a41bd19cc8f83311
 progress:
   total_phases: 6
   completed_phases: 1
@@ -51,6 +51,7 @@ Recent trend: N/A (no plans executed yet)
 | Phase 02 P03 | 12min | 2 tasks | 1 files |
 | Phase 03 P02 | 12m | 2 tasks | 1 files |
 | Phase 05 P01 | ~1h | 3 tasks | 5 files |
+| Phase 05 P02 | 32min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -68,9 +69,9 @@ Recent trend: N/A (no plans executed yet)
 
 ## Session Continuity
 
-**Stopped at:** Completed 05-01-PLAN.md
+**Stopped at:** Completed 05-01-PLAN.md and 05-02-PLAN.md
 
-Last session: 2026-09-23T13:35:43.911Z
+Last session: 2026-09-23T13:36:42.187Z
 Last completed: Phase 1 closed — PKG-03 code fix (both spawn sites), verification-trap doc/plan cleanup, and Task 4's real-hardware human checkpoint (PASS), all this session. Phase 02.1 execution and Phase 1 Tasks 1-3 completed 2026-09-17.
 Resume file: None
 
@@ -85,3 +86,4 @@ Resume file: None
 - [Phase 3]: 03-02: darwin autostart block inserted immediately after the engine attach/start success point (structural position), not the plan's stale absolute line numbers — file had shifted ~28 lines from concurrent phase work.
 - [Phase 3]: Phase 5 Plan 01: preflight checker tests real invariants, not a stale threat-model premise - all 3 claimed macOS process-lifecycle blockers are already fixed in current source
 - [Phase 3]: Phase 5 Plan 01: agent_turn.cjs observes orgtree_chart tool calls via the real /chat transcript API, not an engine-internal monkeypatch, since engine.ts hardcodes the unmodified launch.py spawn path
+- [Phase 3]: 05-02: POSIX descriptor-protection implemented in service_host.py; 3 of 4 Windows-only test-skip 'blockers' the plan cited turned out stale on source inspection (guardian, kill-tree, and readiness class already work on POSIX) — dispositions corrected accordingly
