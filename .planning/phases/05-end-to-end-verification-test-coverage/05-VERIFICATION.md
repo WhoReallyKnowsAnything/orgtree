@@ -1,8 +1,8 @@
 ---
 phase: 05-end-to-end-verification-test-coverage
 verified: 2026-09-23T00:00:00Z
-status: human_needed
-score: 4/5 must-haves verified
+status: passed
+score: 5/5 must-haves verified
 behavior_unverified: 0
 overrides_applied: 0
 human_verification:
@@ -15,7 +15,7 @@ human_verification:
 
 **Phase Goal:** Prove a real agent job runs on macOS and close the Windows-only test gaps
 **Verified:** 2026-09-23
-**Status:** human_needed
+**Status:** passed (human verification completed 2026-09-23)
 **Re-verification:** No — initial verification
 
 ## Goal Achievement
@@ -26,7 +26,7 @@ human_verification:
 |---|-------|--------|----------|
 | 1 | A launched macOS build can spawn one real Claude Code agent turn observable through the app's own chat UI | ⚠️ Partially proven — see Human Verification | `tests/acceptance/run_agent_turn.mjs` + `agent_turn.cjs` exist, are wired to real Electron main (`apps/desktop/main/index.ts`) → Python engine (`engine/launch.py`), and were executed live on this machine: app built, Python runtime provisioned, `engine/mailhub` submodule initialized. Run got past renderer mount and organization creation, then failed at "hire agent" because the isolated acceptance sandbox's `accounts-registry.json` has zero provider accounts (no way to inject real credentials here). No successful live hire+chat has been observed anywhere yet. |
 | 2 | The two known process-lifecycle gaps (codexrun.py/antigravityrun.py missing `start_new_session`, `process_lifetime.py`'s unconditional non-nt `RuntimeError`) are caught by an automated pre-flight gate instead of being worked around inside the acceptance test | ✓ VERIFIED | `tools/verify-macos-preflight.mjs` exists (61 lines), performs the three static source checks described in the plan, and running it live produces `{"status":"PASS"}` exit 0 (spot-checked). `run_agent_turn.mjs` wires it as a required pre-check. |
-| 3 | A human has confirmed on real Apple Silicon hardware that the packaged `.app` completes one real agent job with no manual workaround beyond the documented Gatekeeper step | ✗ NOT YET DONE — human_needed | `docs/qa/macos-hardware-verification.md` exists (40 lines) with the full checklist, but its Result section reads: "Status: Not yet run — blocked on Phase 1-4 shipping a real macOS package target and provider process-lifecycle fixes to verify against." No date/verifier/notes recorded. |
+| 3 | A human has confirmed on real Apple Silicon hardware that the packaged `.app` completes one real agent job with no manual workaround beyond the documented Gatekeeper step | ✓ VERIFIED (human, 2026-09-23) | `docs/qa/macos-hardware-verification.md` Result: PASS by WhoReallyKnowsAnything. Build d0bb47e run on the build machine (not a second Mac) with the quarantine attribute set; no Gatekeeper block; a real Claude account was added and a hired agent completed a real task, with reply and `orgtree_chart` tool call visible. |
 | 4 | The Windows-only test suite gets macOS counterparts so mac-specific logic has real coverage instead of silent skips (VER-02) | ✓ VERIFIED | 6 new `_on_posix` companion tests in `tests/test_service_host.py` and 2 in `tests/test_claude_pipe_lifecycle.py` exist and pass (spot-checked one named test from each, both PASSED). `tests/test_process_lifetime.py` (8 tests, no gate) and `tests/test_startup_readiness.py` (2 tests, Windows-only gate removed) both run and pass fully on POSIX (10/10, confirmed by full-file run). One residual Windows-only skip remains in `tests/test_startup_progress.py::BootStartupTests`, honestly re-documented (not silently skipped) with a source-verified reason and tracked as an open item in `.planning/WINDOWS.md` (#4, phase 05) rather than claimed fixed. |
 | 5 | No silent/undocumented process-lifecycle regressions were introduced while closing the gaps | ✓ VERIFIED | `engine/service_host.py`'s POSIX branches (`os.name != "nt"`) implement real `chmod(0o600)`, `O_CREAT|O_EXCL`, and `st_uid`/`st_mode` verification — not stubs. No debt markers (TODO/FIXME/XXX/placeholder) found in any of the 10 files this phase touched. |
 
@@ -78,7 +78,7 @@ No `scripts/*/tests/probe-*.sh` convention used by this project; no probes decla
 
 | Requirement | Source Plan | Description | Status | Evidence |
 |-------------|-------------|--------------|--------|----------|
-| VER-01 | 05-01 | Packaged unsigned `.app` builds, launches, and completes a real end-to-end agent job on macOS | ? NEEDS HUMAN | Automated acceptance runner + preflight gate exist, are wired correctly, and were executed live as far as possible without real provider credentials (reached hire-agent step, blocked by empty accounts-registry.json in the isolated sandbox — not a code defect). The one remaining proof point — a human on real Apple Silicon hardware completing a full hire+chat — is documented in `docs/qa/macos-hardware-verification.md` and its Result section still reads "Not yet run". REQUIREMENTS.md marks VER-01 complete; this VERIFICATION.md records the outstanding hardware/credentialed proof as a human-verification item per explicit orchestrator instruction, and does not alter the REQUIREMENTS.md checkbox. |
+| VER-01 | 05-01 | Packaged unsigned `.app` builds, launches, and completes a real end-to-end agent job on macOS | ✓ SATISFIED | Automated acceptance runner + preflight gate exist and are wired correctly (the sandboxed runner stops at hire because its isolated accounts registry is empty). The hardware proof was completed by a human on 2026-09-23: see `docs/qa/macos-hardware-verification.md` Result (PASS; build machine rather than a second Mac, quarantine simulated). |
 | VER-02 | 05-02 | Windows-only test suite gets macOS counterparts instead of silent skips | ✓ SATISFIED | 8 new `_on_posix` companion tests exist and pass; two previously-gated files (`test_process_lifetime.py`, `test_startup_readiness.py`) confirmed passing ungated on POSIX; the one remaining gate (`test_startup_progress.py::BootStartupTests`) is honestly redocumented with a source-verified reason rather than silently skipped, and tracked as an open item in `.planning/WINDOWS.md` (#4) rather than claimed as fixed. This matches the requirement's "real coverage instead of silent skips" bar — the residual gap is visible and tracked, not hidden. |
 
 No orphaned requirements: REQUIREMENTS.md maps only VER-01 and VER-02 to Phase 5, and both are declared in the plans' `requirements` frontmatter (05-01: `[VER-01]`, 05-02 via `requirements-completed: [VER-02]`).
