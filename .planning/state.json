@@ -11,7 +11,7 @@
     {
       "number": "2",
       "name": "Process Lifecycle Port",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "number": "3",
@@ -31,8 +31,8 @@
   ],
   "next": {
     "command": "/gsd:progress --next",
-    "label": "Advance to the next step",
-    "reason": "Phase 02 of 6 · 0% · executing"
+    "label": "Advance to the next step (plan phase 1)",
+    "reason": "Phase 1 of 6 — needs a plan"
   },
-  "updated_at": "2026-09-23T10:19:10.640Z"
+  "updated_at": "2026-09-23T10:36:59.525Z"
 }
