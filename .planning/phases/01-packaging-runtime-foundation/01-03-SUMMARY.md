@@ -45,8 +45,7 @@ key-decisions:
 patterns-established:
   - "Any code path that re-invokes the packaged python interpreter (direct spawn, watchdog re-exec, future subprocess) must set PYTHONDONTWRITEBYTECODE=1 explicitly in its own env construction — do not assume env inheritance covers it once anything builds a filtered env dict."
 
-requirements-completed: [PKG-01]
-requirements-partial: [PKG-03]
+requirements-completed: [PKG-01, PKG-03]
 
 coverage:
   - id: D1
@@ -83,23 +82,23 @@ coverage:
       - kind: other
         ref: "spctl -a --type execute --raw against an xattr-quarantined copy: assessment:verdict=false (Gatekeeper rejects it, consistent with either dialog wording)"
         status: pass
-      - kind: other
-        ref: "Task 4 (checkpoint:human-verify, gate=blocking-human): exact dialog wording on a real double-click, and RUN-01/Intel spot-checks, need a human on real hardware — spctl's CLI assessment cannot distinguish 'damaged' from 'developer cannot be verified' wording"
-        status: pending
+      - kind: human
+        ref: "Task 4 (checkpoint:human-verify, gate=blocking-human), run by the user on real Apple Silicon: in-place launch showed no Gatekeeper/AMFI dialog (one macOS TCC file-access privacy prompt appeared instead — see Deviations); codesign --verify --deep --strict still passed after quitting; a ditto+xattr-quarantined copy showed the recoverable 'cannot be verified' dialog, not 'is damaged'"
+        status: pass
     human_judgment: true
-    rationale: "The specific Gatekeeper dialog text is a Finder/LaunchServices GUI behavior not exposed via any CLI assessment tool; spctl confirms Gatekeeper blocks the quarantined copy (consistent with the fix working) but not which of the two messages appears. This is exactly what Task 4's checkpoint gates on."
+    rationale: "The specific Gatekeeper dialog text is a Finder/LaunchServices GUI behavior not exposed via any CLI assessment tool; spctl confirmed Gatekeeper blocks the quarantined copy (consistent with the fix working), and the user's real-hardware run confirmed the actual dialog wording. Intel hardware was not available; x64 verification remains a documented follow-up per the plan's own allowance."
 
-duration: resumed session (paused 2026-09-17, resumed 2026-09-23)
-completed: unresolved — blocked on Task 4 human checkpoint
-status: blocked
+duration: resumed session (paused 2026-09-17, resumed and closed 2026-09-23)
+completed: 2026-09-23
+status: complete
 ---
 
 # Phase 01-03: Package and Sign the macOS App (PKG-01/PKG-03) Summary
 
-**Fixed the PKG-03 seal-invalidation blocker that paused this phase: two independent code paths spawned/re-exec'd the packaged Python interpreter without suppressing bytecode writes, breaking `codesign --verify --deep --strict` after every launch. Both are fixed and verified via a full engine + guardian launch reproduction. Task 4's real-hardware Gatekeeper dialog check is still an open human checkpoint.**
+**Fixed the PKG-03 seal-invalidation blocker that paused this phase: two independent code paths spawned/re-exec'd the packaged Python interpreter without suppressing bytecode writes, breaking `codesign --verify --deep --strict` after every launch. Both are fixed and verified via a full engine + guardian launch reproduction, and confirmed by the user on real Apple Silicon (Task 4: PASS). Phase 1 is complete.**
 
 ## Performance
-- **Tasks:** 3 of 4 completed pre-pause (Tasks 1–3, committed 2026-09-17); this session added 2 fix commits + 1 docs commit; Task 4 (blocking-human checkpoint) still open.
+- **Tasks:** 3 of 4 completed pre-pause (Tasks 1–3, committed 2026-09-17); this session added 2 fix commits + 1 docs commit and closed Task 4 (blocking-human checkpoint) via the user's real-hardware run.
 - **Files modified this session:** 4 (`apps/desktop/main/engine.ts`, `engine/process_lifetime.py`, `.planning/phases/01-packaging-runtime-foundation/01-03-PLAN.md`, `docs/macos-first-launch.md`)
 
 ## Accomplishments
@@ -132,6 +131,7 @@ See `key-decisions` in frontmatter.
 ## Deviations from Plan
 - **Isolation degrade:** dispatched executor twice via `Agent(gsd-executor, isolation="worktree")`; both times the harness forked the new worktree from `origin/HEAD` (stale, predates this branch's local commits — nothing had been pushed), not local branch tip, per a documented upstream limitation (GSD `worktree.base-check`, reason `head-diverged-from-fork`, ref #48 / claude-code#44965). Escalated to the peer orchestrator session; user approved degrading to sequential execution in the current (correctly-based) worktree for this run only. Code edits within that were still delegated to named agents (`react-dev`, `api-backend`) per this project's model-routing policy — the degrade only skipped the outer isolated-worktree wrapper, not the file-edit delegation rule.
 - **Scope addition:** the guardian-subprocess fix (`engine/process_lifetime.py`) was not anticipated by the original Task 2 plan text — it was found by actually reproducing the launch, not by re-reading the plan. Included because Task 4's acceptance criteria (`codesign --verify --deep --strict` passing post-launch) cannot pass without it.
+- **Non-blocking deviation from "dialog-free" (Task 4, real hardware):** in-place launch showed no Gatekeeper/AMFI dialog as expected, but macOS did show one TCC file-access privacy prompt (most likely a Documents-folder access request, since the build lives under `~/Documents/Projects`; exact wording not captured). This is an OS privacy prompt, unrelated to code signing — not a regression, not something this phase's threat model covers, and it still passed the plan's actual done-criteria (no Gatekeeper/AMFI dialog, `codesign --verify --deep --strict` clean after quitting). Unverified caveat worth flagging forward: TCC grants are keyed to the code signature, so ad-hoc re-signing (this project's signing mode) may cause macOS to re-prompt on every rebuilt copy — worth watching if this becomes annoying in later phases, but out of scope to fix here.
 
 ## Issues Encountered
 - `engine/mailhub` git submodule was uninitialized in this worktree (`git submodule update --init --recursive` required) and `engine/runtime` was unprovisioned (`python3 tools/provision-runtime.py` required) before any build could run. Both are worktree-local setup, not phase bugs.
@@ -141,12 +141,7 @@ See `key-decisions` in frontmatter.
 None beyond what Task 4 already required (real Apple Silicon hardware; Intel hardware optional).
 
 ## Next Phase Readiness
-Blocked on Task 4 (`checkpoint:human-verify`, `gate="blocking-human"`) — needs a human on real Apple Silicon hardware to:
-1. Run `npm run package:mac:dir`, launch the built `.app` in place — must show no Gatekeeper/AMFI dialog.
-2. Apply `com.apple.quarantine` (or transfer via AirDrop/zip) to a copy and confirm the right-click-to-Open / System Settings recovery in `docs/macos-first-launch.md` actually works, and that the dialog reads "developer cannot be verified" (or similar), not "is damaged".
-3. If Intel hardware is available, repeat step 1 against a `package:mac:x64` build (re-provision `engine/runtime` for x86_64 first); otherwise note x64 verification as still pending.
+Phase 1's ROADMAP goal is met: an ad-hoc-signed macOS `.app` builds, launches with no signing-related dialog, survives a real launch/quit cycle with its seal intact, and shows the correct recoverable Gatekeeper dialog when quarantined — verified on Apple Silicon. PKG-01, PKG-02, PKG-03, and RUN-01 are all satisfied. Intel (x64) verification was not run (no Intel hardware available this session) and remains a documented follow-up, per the plan's own allowance for that case. Phase 2 (process lifecycle) can proceed.
 
-### Human verification needed (cannot be completed by this agent)
-- Task 4's real-hardware Gatekeeper dialog check (D4 above) — the exact dialog wording is a GUI-layer behavior `spctl`/`codesign` cannot distinguish from the CLI.
-
-Type "approved" once the in-place launch needed no dialog and the documented quarantine recovery worked (per the plan's own resume-signal), or describe what failed.
+### Human verification (completed)
+- Task 4's real-hardware Gatekeeper dialog check (D4 above): PASS, run by the user on real Apple Silicon 2026-09-23 — in-place launch dialog-free (bar one unrelated TCC privacy prompt, see Deviations), seal intact after quitting, quarantined copy showed "cannot be verified" not "is damaged".

@@ -3,10 +3,10 @@ gsd_state_version: "1.0"
 current_phase: 1
 current_phase_name: Packaging & Runtime Foundation
 status: planning
-stopped_at: 01-03-PLAN.md Task 4 (blocking-human checkpoint)
+stopped_at: Phase 1 complete (01-03-SUMMARY.md); ready to plan Phase 2
 last_updated: "2026-09-23T09:16:10.000Z"
 last_activity: 2026-09-23
-last_activity_desc: "Resumed Phase 1, fixed PKG-03: PYTHONDONTWRITEBYTECODE=1 added to both the packaged engine spawn (apps/desktop/main/engine.ts) and its guardian subprocess env (engine/process_lifetime.py) — two independent bytecode-write sites broke the code signature seal on launch. Verified via real package:mac:dir build: codesign --verify --deep --strict passes before AND after a full engine+guardian launch/shutdown cycle. 01-03-SUMMARY.md written. Still blocked on Task 4's real-hardware Gatekeeper dialog check."
+last_activity_desc: "Resumed and closed Phase 1: fixed PKG-03 (PYTHONDONTWRITEBYTECODE=1 in both the packaged engine spawn and its guardian subprocess env — two independent bytecode-write sites broke the code signature seal on launch), verified via a real package:mac:dir build (codesign --verify --deep --strict clean before and after a full engine+guardian launch cycle), then the user ran Task 4's real-hardware Gatekeeper checkpoint on Apple Silicon: PASS. 01-03-SUMMARY.md written, status complete."
 state_head: 4af4984ea27c3e90cbb145bda5d5fff13eef9583
 progress:
   total_phases: 6
@@ -23,14 +23,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-17)
 
 **Core value:** The app runs and works correctly on macOS: build, launch, spawn agents, and manage their work end-to-end — matching what the Windows build already does.
-**Current focus:** Phase 1 partially executed — PKG-03 code fix complete and verified; blocked on Task 4's real-hardware Gatekeeper checkpoint
+**Current focus:** Phase 1 complete (PKG-01, PKG-02, PKG-03, RUN-01 all met, Task 4 human checkpoint PASS on 2026-09-23). Ready to plan/execute Phase 2 (process lifecycle).
 
 ## Current Position
 
 Phase: 1 of 5 (Packaging & Runtime Foundation)
-Plan: 1 of 3 in current phase (12 plans total across phases 1-5)
-Status: Phases 1 and 02.1 executed (Phase 1 INCOMPLETE — Task 4 human checkpoint pending); phases 2, 3, 4, 5 planned, not started
-Last activity: 2026-09-23 — PKG-03's code fix (PYTHONDONTWRITEBYTECODE=1 in both the engine spawn and its guardian subprocess) is committed and verified: codesign --verify --deep --strict passes both before and after a real launch/shutdown cycle. RUN-01 and PKG-02 confirmed unregressed. PKG-01 now fully met (bundle passes strict verify, not just -dv). PKG-03 code-level cause resolved; still blocked on Task 4's real-hardware Gatekeeper dialog check (see 01-03-SUMMARY.md).
+Plan: 3 of 3 in current phase — Phase 1 complete (12 plans total across phases 1-5)
+Status: Phases 1 and 02.1 executed and complete; phases 2, 3, 4, 5 planned, not started
+Last activity: 2026-09-23 — PKG-03's code fix (PYTHONDONTWRITEBYTECODE=1 in both the engine spawn and its guardian subprocess) is committed and verified: codesign --verify --deep --strict passes both before and after a real launch/shutdown cycle. Task 4 (blocking-human checkpoint) then run by the user on real Apple Silicon: PASS — in-place launch dialog-free bar one unrelated TCC privacy prompt, seal intact post-quit, quarantined copy showed the correct recoverable Gatekeeper dialog. Phase 1 closed: PKG-01, PKG-02, PKG-03, RUN-01 all met (see 01-03-SUMMARY.md). Intel/x64 verification still a documented follow-up (no Intel hardware this session).
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -57,15 +57,15 @@ Recent trend: N/A (no plans executed yet)
 - Phase 1: nested unsigned binaries inside the `.app` bundle can re-trigger the AMFI failure if ad-hoc signing doesn't cover the full bundle, not just the top-level `.app`.
 - Phase 3: `openAtLogin`/LaunchAgent reliability under an unsigned build is a documented caveat, not yet a tested outcome — verify by hand.
 - ~~Owned by Phase 2.1 (PROC-04): `arm_process_lifetime` raises unconditionally when `os.name != "nt"`~~ — RESOLVED 2026-09-17 by 02.1-01-PLAN.md (commits `30dec80`/`fbc9fc4`/`4af4984` on `session/execute-phase-2-1-engine-process-lifetim`): `PosixTree` adapter implemented, `engine/launch.py::main()` self-setpgids, `LifetimeTests`/`LaunchRefusalTests` un-skipped and passing on macOS. Residual gap (NOT resolved): a descendant in its own escaped process group is only provably swept when the guardian's teardown runs while the engine is still alive — see `02.1-01-SUMMARY.md` Threat Flags and `.planning/WINDOWS.md` entry #1.
-- **RESOLVED 2026-09-23 (PKG-03 code-level cause) — STILL BLOCKS Phase 1 closure on Task 4's human checkpoint.** Cause was two independent code paths writing `__pycache__/*.cpython-313.pyc` into the signed `Contents/Resources/engine/` tree at launch: the main engine spawn (`apps/desktop/main/engine.ts`) and its guardian watchdog re-exec (`engine/process_lifetime.py::arm_process_lifetime`, which builds a deliberately strict allowlisted env for the child and silently dropped `PYTHONDONTWRITEBYTECODE` even after the first fix). Fix: `PYTHONDONTWRITEBYTECODE=1` set explicitly in both spawn sites (commits `6175497`, `d9021bd`). Verified on a real `package:mac:dir` build: `codesign --verify --deep --strict` passes both before and after a full launch/shutdown cycle, 0 `__pycache__` anywhere in the bundle. Also replaced the `codesign -dv` verification-trap checks in the plan and `docs/macos-first-launch.md` with `--verify --deep --strict` (commit `fd5f9fb`) — `-dv` only proves a signature exists, which is exactly how this bug shipped undetected the first time. **Remaining:** Task 4 (`01-03-PLAN.md`, `checkpoint:human-verify`, `gate="blocking-human"`) still needs a human on real Apple Silicon hardware to confirm the quarantined-copy dialog reads "developer cannot be verified" (not "is damaged") — `spctl`/`codesign` confirm Gatekeeper blocks the quarantined copy but can't distinguish the two dialog texts from the CLI. See `01-03-SUMMARY.md`.
+- ~~RESOLVED 2026-09-23 (PKG-03): the packaged `.app` failed `codesign --verify --deep --strict` after launch~~ — CLOSED. Cause was two independent code paths writing `__pycache__/*.cpython-313.pyc` into the signed `Contents/Resources/engine/` tree at launch: the main engine spawn (`apps/desktop/main/engine.ts`) and its guardian watchdog re-exec (`engine/process_lifetime.py::arm_process_lifetime`, whose deliberately strict allowlisted env for the child silently dropped `PYTHONDONTWRITEBYTECODE` even after the first fix). Fix: `PYTHONDONTWRITEBYTECODE=1` set explicitly in both spawn sites (commits `6175497`, `d9021bd`); `codesign -dv` verification-trap checks replaced with `--verify --deep --strict` in the plan and `docs/macos-first-launch.md` (commit `fd5f9fb`). Task 4 (`checkpoint:human-verify`) run by the user on real Apple Silicon 2026-09-23: PASS — in-place launch dialog-free (one unrelated macOS TCC file-access privacy prompt appeared, not a signing issue — see `01-03-SUMMARY.md` Deviations), seal intact after quitting, quarantined copy showed the recoverable "cannot be verified" dialog, not "is damaged". Intel/x64 hardware verification not available this session; documented follow-up per the plan's own allowance.
 
 ## Session Continuity
 
-**Stopped at:** `01-03-PLAN.md` Task 4 — `checkpoint:human-verify`, `gate="blocking-human"`. PKG-03's code fix is done and verified; only the real-hardware Gatekeeper dialog check is outstanding.
+**Stopped at:** Phase 1 complete. Next: plan Phase 2 (process lifecycle), e.g. via `/gsd-plan-phase 2` or `/gsd-next`.
 
 Last session: 2026-09-23T09:16:10.000Z
-Last completed: PKG-03 code fix (both spawn sites) and verification-trap doc/plan cleanup, this session. Phase 02.1 execution and Phase 1 Tasks 1-3 completed 2026-09-17.
-Resume file: `01-03-SUMMARY.md` (written this session, status: blocked). Resume by running Task 4 on real Apple Silicon hardware per its `how-to-verify` steps, then typing "approved" (or describing what failed) per its `resume-signal`.
+Last completed: Phase 1 closed — PKG-03 code fix (both spawn sites), verification-trap doc/plan cleanup, and Task 4's real-hardware human checkpoint (PASS), all this session. Phase 02.1 execution and Phase 1 Tasks 1-3 completed 2026-09-17.
+Resume file: `01-03-SUMMARY.md` (status: complete). No open items block Phase 2 start; Intel/x64 verification remains a documented, non-blocking follow-up.
 
 ## Decisions
 
