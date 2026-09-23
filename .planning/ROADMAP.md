@@ -51,13 +51,13 @@ Plans:
   2. The engine's liveness check correctly reports whether a provider process is alive or dead on macOS, matching real process state (`os.kill(pid, 0)` verified against actual macOS behavior).
   3. Stopping an agent kills the provider CLI and all of its descendant processes on macOS — including `codexrun.py`'s process, once it spawns with `start_new_session` like `gitrunner.py` already does — leaving no orphaned processes.
 
-**Plans**: 3 plans
+**Plans**: 1/3 plans executed
 
 Plans:
 
 - [ ] 02-01-PLAN.md — codexrun.py + antigravityrun.py: start_new_session spawn + os.killpg termination (PROC-03)
 - [ ] 02-02-PLAN.md — supervisor.py (4 spawn sites + _wd_kill_tree) + mailhub_runtime.py orphan reclaim (PROC-03, D-07 scope)
-- [ ] 02-03-PLAN.md — PROC-01/PROC-02 verification: mocked-path resolver tests + liveness confirmation
+- [x] 02-03-PLAN.md — PROC-01/PROC-02 verification: mocked-path resolver tests + liveness confirmation
 
 ### Phase 02.1: Engine Process Lifetime POSIX Adapter (INSERTED)
 
@@ -139,7 +139,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Packaging & Runtime Foundation | 0/TBD | Not started | - |
-| 2. Process Lifecycle Port | 0/TBD | Not started | - |
+| 2. Process Lifecycle Port | 1/3 | In Progress|  |
 | 3. Launchd Autostart | 0/2 | Not started | - |
 | 4. macOS UI & OS Integration Parity | 0/TBD | Not started | - |
 | 5. End-to-End Verification & Test Coverage | 0/TBD | Not started | - |
