@@ -1,100 +1,48 @@
-# Requirements: Orgtree (macOS Port)
+# Requirements: Orgtree (macOS fork)
 
-**Defined:** 2026-09-17
-**Core Value:** The app runs and works correctly on macOS: build, launch, spawn agents, and manage their work end-to-end — matching what the Windows build already does.
+**Defined:** 2026-09-26
+**Core Value:** The app runs and works correctly on macOS without breaking the Windows build that upstream ships.
 
-## v1 Requirements
+## Active
 
-### Packaging & Build
+Committed scope. Each maps to exactly one roadmap phase.
 
-- [ ] **PKG-01**: `electron-builder` config gains a working `mac` target producing an unsigned/ad-hoc-signed local `.app` (`mac.identity: null` or `"-"`)
-- [ ] **PKG-02**: App ships `.icns` icon assets (generated via `iconutil`), replacing the `.ico`-only assets
-- [ ] **PKG-03**: First-launch Gatekeeper/AMFI approval flow is documented for the user (right-click→Open / System Settings approval) — no code fix exists, this is doc + a manual verification step on real Apple Silicon hardware early in the port
+### Hardening
 
-### Python Runtime
+- [ ] **HARD-01**: Developer can run the full `npm test` suite on macOS with zero failures, including `tests/update-rehearsal.test.mjs`
+- [ ] **HARD-02**: User who reboots their Mac finds the Orgtree engine running without opening the app
+- [ ] **HARD-03**: User whose engine crash-loops sees the remediation dialog, not a false "disabled" state
 
-- [ ] **RUN-01**: `tools/provision-runtime.py` provisions a macOS Python runtime via `python-build-standalone` (arch-specific `aarch64`/`x86_64` `install_only` tarball), replacing its current hard-exit on non-`win32`
+### Upstream Sync
 
-### Process Lifecycle (POSIX)
-
-- [x] **PROC-01**: Executable resolution (`providers.py` and related) resolves provider CLIs (Claude Code, Codex, Antigravity) correctly on macOS — verify existing `shutil.which()` fallback covers real macOS install paths (npm shims, Antigravity install location)
-- [x] **PROC-02**: Process liveness checks work on macOS — verify existing POSIX branch in `liveness.py` (`os.kill(pid, 0)`) against real macOS behavior
-- [x] **PROC-03**: Child-process containment (killing a provider CLI kills its descendants, not just the parent) works on macOS for every process spawn path, including `codexrun.py::CodexProcess.close()` where `start_new_session` is currently missing — matching the pattern already correct in `gitrunner.py` (codexrun.py/antigravityrun.py in 02-01; supervisor.py's 4 spawn sites + mailhub_runtime.py in 02-02)
-- [x] **PROC-04**: The engine's process-lifetime guardian (`engine/process_lifetime.py::arm_process_lifetime`) has a POSIX/macOS adapter that reproduces the Windows Job Object guardian's guarantees — engine startup succeeds on macOS, and both normal engine exit and parent process death cause the guardian to terminate the engine's full process tree and release the data-root lock only after termination completes
-
-### Boot Autostart
-
-- [x] **BOOT-01**: Engine autostart on login is implemented via a per-user `launchd` LaunchAgent plist (`~/Library/LaunchAgents/`), replacing the Windows Scheduled Task + registry mechanism
-- [x] **BOOT-02**: App detects and surfaces to the user when macOS has silently disabled the LaunchAgent after a crash loop (no programmatic re-enable exists — must prompt, not fail silently)
-
-### macOS UI Parity
-
-- [x] **UI-01**: Cross-org "attention" signal (currently Windows `flashFrame`) uses `app.dock.bounce('critical')` on macOS
-- [x] **UI-02**: Window lifecycle follows macOS convention (`window-all-closed` doesn't quit the app; `activate` reopens the window) — currently only Windows-style close-quits-app behavior exists
-- [x] **UI-03**: App has a native macOS app menu (currently none — Windows relies on the OS-provided menu bar behavior)
-- [x] **UI-04**: Dock badge count reflects pending tickets/mail via `app.setBadgeCount()`
-- [x] **UI-05**: Tray icon uses a Template image so it adapts to light/dark macOS menu bar
-
-### Update Notice
-
-- [x] **UPD-01**: App shows a "new version available" notice (version-check only, no auto-apply) — full auto-update via `electron-updater`/Squirrel.Mac is blocked by code-signing requirements this project doesn't meet
-
-### Verification
-
-- [x] **VER-01**: Packaged unsigned `.app` builds, launches, and completes a real end-to-end agent job on macOS (spawn agent → agent does work → result lands back in orgtree)
-- [x] **VER-02**: Windows-only test suite (installer/elevation/taskbar probes, `test_service_host.py` Windows-only skips) gets macOS counterparts so mac-specific logic has real coverage instead of silent skips
-
-## v2 Requirements
-
-Deferred — acknowledged but not in current roadmap.
+- [ ] **SYNC-01**: User can build and launch the fork on macOS from a tree that contains current `upstream/main`
+- [ ] **SYNC-02**: User can complete a real agent turn on macOS after the upstream merge
+- [ ] **SYNC-03**: Windows user can build and install the fork's NSIS installer after the upstream merge
 
 ### Distribution
 
-- **DIST-01**: Code-signed, notarized `.dmg` distribution (requires Apple Developer account)
-- **DIST-02**: Full `electron-updater` auto-update on macOS (depends on DIST-01)
-- **DIST-03**: `setLoginItemSettings`-based GUI toggle for autostart, layered on top of the `launchd` LaunchAgent from BOOT-01
+- [ ] **DIST-01**: User can download a signed, notarized `.dmg` and open Orgtree without a Gatekeeper override
+- [ ] **DIST-02**: User on an older macOS release is offered and can install a newer one through the in-app updater
+- [ ] **DIST-03**: User can turn engine autostart on or off from the app's settings
+
+## v2 Requirements
+
+Deferred. Tracked, not in the current roadmap.
+
+(None yet)
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Signed/notarized `.dmg` distribution | No Apple Developer account; unsigned local build is sufficient for v1 (deferred to DIST-01) |
-| Mac App Store distribution | MAS sandboxing conflicts with this app's core subprocess-spawning architecture — never planned |
-| NSIS-equivalent `.pkg` installer | Unsigned `.app` via `electron-builder --mac --dir` is enough for v1 |
-| Linux support | Not requested; no Linux-specific findings surfaced during codebase mapping or research |
-| Full auto-update on macOS | Blocked by code signing (Squirrel.Mac refuses unsigned updates); version-check notice (UPD-01) covers v1 needs |
+| Linux support | Not requested; no Linux-specific work in the codebase |
+| `.pkg` installer | `.dmg` covers distribution |
+| Framework rewrite | Would make the fork unmergeable with upstream |
 
 ## Traceability
 
-Filled in during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PKG-01 | Phase 1 | Pending |
-| PKG-02 | Phase 1 | Pending |
-| PKG-03 | Phase 1 | Pending |
-| RUN-01 | Phase 1 | Pending |
-| PROC-01 | Phase 2 | Complete |
-| PROC-02 | Phase 2 | Complete |
-| PROC-03 | Phase 2 | Complete |
-| PROC-04 | Phase 2.1 | Complete |
-| BOOT-01 | Phase 3 | Complete |
-| BOOT-02 | Phase 3 | Complete |
-| UI-01 | Phase 4 | Complete |
-| UI-02 | Phase 4 | Complete |
-| UI-03 | Phase 4 | Complete |
-| UI-04 | Phase 4 | Complete |
-| UI-05 | Phase 4 | Complete |
-| UPD-01 | Phase 4 | Complete |
-| VER-01 | Phase 5 | Complete |
-| VER-02 | Phase 5 | Complete |
-
-**Coverage:**
-
-- v1 requirements: 17 total
-- Mapped to phases: 17
-- Unmapped: 0 ✓
 
 ---
-*Requirements defined: 2026-09-17*
-*Last updated: 2026-09-17 after initial definition*
+*Last updated: 2026-09-26 after /cad-adopt*

@@ -1,81 +1,67 @@
-# Orgtree (macOS Port)
+# Orgtree (macOS fork)
 
 ## What This Is
 
-Orgtree is a desktop workspace for running a persistent team of coding agents (Claude Code, Codex, Antigravity, OpenRouter models), presented as an interactive org chart. This fork ports the existing Windows-only Electron + Python-engine app to run natively on macOS, so the same agent-orchestration workflow works on a Mac.
+Orgtree is a desktop workspace for running a persistent team of coding agents (Claude Code, Codex, Antigravity, OpenRouter models), shown as an interactive org chart. This fork (`WhoReallyKnowsAnything/orgtree`) adds native macOS support to the Windows-only upstream (`Maurdekye/orgtree`) so the same agent-orchestration workflow runs on a Mac.
 
 ## Core Value
 
-The app runs and works correctly on macOS: build, launch, spawn agents, and manage their work end-to-end — matching what the Windows build already does.
+The app runs and works correctly on macOS (build, launch, spawn agents, manage their work end to end) without breaking the Windows build that upstream ships.
 
 ## Requirements
 
 ### Validated
 
-<!-- Inferred from existing Windows codebase — .planning/codebase/ARCHITECTURE.md, STACK.md -->
+- ✓ Electron desktop UI renders an interactive org chart of agents - upstream
+- ✓ Python engine (HTTP + bearer token over loopback) drives agent lifecycle, mail, tickets, evidence - upstream
+- ✓ Multi-provider agent execution via CLI subprocess spawning (Claude Code, Codex, Antigravity, OpenRouter) - upstream
+- ✓ Persistent conversation/task history, git-worktree agent workspaces - upstream
+- ✓ Windows installer (NSIS), auto-update, boot autostart via Scheduled Task - upstream
+- ✓ Unsigned, ad-hoc-signed macOS `.app` builds with bundled Python runtime and `.icns` icon - GSD phase 1
+- ✓ Provider CLI resolution, liveness checks and process-tree termination work on POSIX (process groups, `os.killpg`) - GSD phase 2
+- ✓ Engine process lifetime uses a POSIX adapter instead of Windows job objects - GSD phase 2.1
+- ✓ Engine autostart via `launchd` LaunchAgent with disabled/crash-loop detection and remediation dialog - GSD phase 3
+- ✓ macOS UI parity: native app menu, dock bounce/badge, template tray icon, window recreate, mac update notice - GSD phase 4
+- ✓ Real agent turn completes end to end on macOS hardware (VER-01); Windows-only tests have explicit macOS disposition (VER-02) - GSD phase 5
 
-- ✓ Electron desktop UI renders an interactive org chart of agents — existing
-- ✓ Engine (Python, HTTP+bearer-token over loopback) drives agent lifecycle, mail, tickets, evidence — existing
-- ✓ Multi-provider agent execution via CLI subprocess spawning (Claude Code, Codex, Antigravity, OpenRouter) — existing
-- ✓ Persistent conversation/task history, git worktree-based agent workspaces — existing
-- ✓ Windows installer (NSIS), auto-update, boot-time engine autostart via Scheduled Task — existing (Windows only)
+### Active (milestone v2.2.0)
 
-### Active
-
-- [ ] **MAC-01**: `package.json` electron-builder config gains a working `mac` target (unsigned, local build)
-- [ ] **MAC-02**: App icon assets exist in `.icns` (currently `.ico`-only)
-- [ ] **MAC-03**: `tools/provision-runtime.py` provisions a macOS Python runtime (currently hard-exits on non-`win32`)
-- [ ] **MAC-04**: All `os.name == "nt"` / `cmd.exe` / `.exe`/`.cmd` executable-resolution branches in `engine/backend/orgtree/` get a macOS/POSIX equivalent
-- [ ] **MAC-05**: `ctypes.windll.kernel32` calls (`liveness.py`, `antigravityrun.py`) get a macOS-safe equivalent or platform branch
-- [ ] **MAC-06**: Windows `taskkill` process-containment (`gitrunner.py`) gets a POSIX process-group equivalent
-- [ ] **MAC-07**: `apps/desktop/main/taskbar.ts` Windows-only Electron APIs (`setAppDetails`, `flashFrame`) get a macOS dock/badge equivalent or safe no-op
-- [ ] **MAC-08**: Boot-time engine autostart ported from Windows Scheduled Task + registry to a macOS `launchd` agent
-- [ ] **MAC-09**: App builds, launches, and completes a real agent job end-to-end on macOS
-- [ ] **MAC-10**: Windows-only test suite (installer/elevation/taskbar probes, `test_service_host.py` skips) gets macOS counterparts so mac-specific logic has real coverage, not silent skips
+- [ ] Full test suite is green on macOS, including the update-rehearsal tests
+- [ ] LaunchAgent autostart confirmed across a real reboot and a real crash loop
+- [ ] Fork carries current upstream (`Maurdekye/orgtree` main) with macOS support intact and Windows build still working
+- [ ] Signed, notarized `.dmg` distribution
+- [ ] macOS auto-update through `electron-updater`
+- [ ] GUI toggle for autostart layered on the LaunchAgent
 
 ### Out of Scope
 
-- Signed/notarized `.dmg` distribution — no Apple Developer account yet; local unsigned builds are sufficient for v1
-- NSIS installer replacement (e.g., `.pkg` installer) — running via `electron-builder --mac --dir` / unsigned `.app` is enough for v1
-- Linux support — not requested, no Linux-specific findings in codebase map
+- Linux support - not requested; no Linux-specific work in the codebase
+- `.pkg` installer - `.dmg` covers distribution; `.pkg` adds nothing a user needs here
+- Rewriting away from Electron + Python - would make the fork unmergeable with upstream
 
 ## Context
 
-- This is a fork (`WhoReallyKnowsAnything/orgtree`, `upstream` = `Maurdekye/orgtree`), cloned to `~/Documents/Projects/orgtree`. Original author gave permission to fork; repo is MIT licensed regardless.
-- Full existing-codebase analysis lives in `.planning/codebase/` (STACK, ARCHITECTURE, STRUCTURE, CONVENTIONS, TESTING, INTEGRATIONS, CONCERNS — 1064 lines, committed `ea1eeea`). CONCERNS.md enumerates 14 explicit macOS-port blockers with file paths — treat it as the primary source of truth when planning phases.
-- No `pywin32` dependency — Windows-specific code uses stdlib `ctypes`/`os.name`, not a native extension, which makes most of it portable to `ctypes` no-ops or `os.name`-branched POSIX code rather than requiring a rewrite.
-- Electron main↔Python engine boundary is HTTP+bearer-token over loopback, not stdio — this layer is already platform-agnostic and shouldn't need porting work.
+- Stack: Electron main/preload/renderer in TypeScript (`apps/desktop/`, `packages/`), Python engine in `engine/backend/orgtree/`, `engine/mailhub` git submodule, electron-builder packaging, tests under `tests/` (node `--test` `.mjs` and pytest).
+- `package.json` version `2.1.7-beta.0`; tags `v2.1.x` come from upstream, latest `v2.1.9`.
+- Fork is 122 commits ahead and 369 behind `upstream/main` as of 2026-09-26: upstream sync is a large merge, not a rebase.
+- Prior planning history (GSD, phases 1-5) is archived in `.planning-gsd/`, including `codebase/CONCERNS.md` and per-phase research.
+- Known rough edges: `tests/update-rehearsal.test.mjs` / `tools/rehearsal-isolation.mjs` fail on POSIX (Windows drive-letter fixtures vs. error message); phase 3 has no VERIFICATION report and its reboot/crash-loop checks were left as human UAT.
+- Windows-specific code uses stdlib `ctypes`/`os.name` branches, no `pywin32`, so platform branching stays local.
 
 ## Constraints
 
-- **Tech stack**: Must stay Electron (TS/JS) + Python engine — matching upstream's stack, no rewrite to a different framework, to keep the fork mergeable/rebasable against upstream.
-- **Distribution**: Unsigned local build only for v1 — no Apple Developer account, no notarization pipeline.
-- **Compatibility**: Keep Windows build working — this is a fork adding macOS support, not replacing the Windows target, so upstream sync stays possible.
+- **Tech stack**: Electron (TS) + Python engine - matches upstream so the fork stays mergeable.
+- **Compatibility**: Windows build must keep working - fork adds macOS, does not replace Windows.
+- **Distribution**: Signing and notarization need an Apple Developer account - the distribution work is blocked until one exists.
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| v1 ships as unsigned local build, not signed .dmg | No Apple Developer account; user just wants it running on their Mac | — Pending |
-| Port Windows boot-autostart to launchd rather than dropping it | User wants autostart parity with the Windows build | — Pending |
-| Keep full provider parity (Claude Code/Codex/Antigravity/OpenRouter) | No provider-specific blockers found — only the exec-resolution logic around them is Windows-specific | — Pending |
-
-## Evolution
-
-This document evolves at phase transitions and milestone boundaries.
-
-**After each phase transition** (via `/gsd-transition`):
-1. Requirements invalidated? → Move to Out of Scope with reason
-2. Requirements validated? → Move to Validated with phase reference
-3. New requirements emerged? → Add to Active
-4. Decisions to log? → Add to Key Decisions
-5. "What This Is" still accurate? → Update if drifted
-
-**After each milestone** (via `/gsd-complete-milestone`):
-1. Full review of all sections
-2. Core Value check — still the right priority?
-3. Audit Out of Scope — reasons still valid?
-4. Update Context with current state
+| Electron + Python engine, no rewrite | Keep fork rebasable/mergeable against upstream | ✓ Good |
+| Ship v1 macOS as unsigned local `.app` | No Apple Developer account at the time | ✓ Good (shipped in GSD phase 1) |
+| Port boot autostart to a `launchd` LaunchAgent | Autostart parity with Windows Scheduled Task | ✓ Good (GSD phase 3) |
+| POSIX process groups + `os.killpg` for process-tree kill | Replaces `taskkill /T` containment | ✓ Good (GSD phase 2) |
 
 ---
-*Last updated: 2026-09-17 after initialization*
+*Last updated: 2026-09-26 after /cad-adopt*

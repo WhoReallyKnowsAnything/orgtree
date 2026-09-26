@@ -1,146 +1,62 @@
-# Roadmap: Orgtree (macOS Port)
+# Roadmap: Orgtree (macOS fork)
 
 ## Overview
 
-Orgtree currently only runs on Windows: NSIS packaging, a Scheduled Task for boot autostart, `taskkill`/`ctypes` process management, and Windows-only taskbar/menu behavior. This roadmap ports it to macOS in dependency order. Nothing is testable on real hardware until a launchable `.app` exists, so packaging comes first. Process lifecycle is ported next because the autostart mechanism (Phase 3) invokes the engine and needs correct POSIX process management underneath it. UI/OS-integration parity is the most isolated work and is sequenced after the harder plumbing. The port closes with an end-to-end verification phase that proves a real agent job runs start-to-finish on macOS and that the Windows-only test skips have macOS counterparts.
+The macOS port shipped under GSD (phases 1-5, archived in `.planning-gsd/`). This milestone (v2.2.0) first closes the port's loose ends so there is a green macOS baseline, then pulls in the 369 upstream commits against that baseline, then turns the unsigned local build into real distribution. Distribution comes last because signing needs an Apple Developer account and auto-update depends on signing.
 
 ## Phases
 
-**Phase Numbering:**
-
-- Integer phases (1, 2, 3): Planned milestone work
-- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
-
-Decimal phases appear between their surrounding integers in numeric order.
-
-- [ ] **Phase 1: Packaging & Runtime Foundation** - Produce a launchable, ad-hoc-signed macOS `.app` with a bundled Python runtime and `.icns` icon
-- [x] **Phase 2: Process Lifecycle Port** - Port provider CLI resolution, liveness checks, and process-tree termination to POSIX
- (completed 2026-09-23)
-- [ ] **Phase 3: Launchd Autostart** - Replace the Windows Scheduled Task with a `launchd` LaunchAgent, with crash-loop detection
-- [ ] **Phase 4: macOS UI & OS Integration Parity** - Dock/menu/tray behavior and update notices match native macOS conventions
-- [ ] **Phase 5: End-to-End Verification & Test Coverage** - Prove a real agent job runs on macOS and close the Windows-only test gaps
+- [ ] **Phase 1: macOS Hardening** - Green test suite on macOS and real-hardware proof of launchd autostart
+- [ ] **Phase 2: Upstream Sync** - Merge current `upstream/main` with macOS support and the Windows build both intact
+- [ ] **Phase 3: Signed Distribution** - Signed, notarized `.dmg` that opens without Gatekeeper overrides
+- [ ] **Phase 4: macOS Auto-Update** - In-app updater installs a newer signed release on macOS
+- [ ] **Phase 5: Autostart Toggle** - Settings control that turns LaunchAgent autostart on and off
 
 ## Phase Details
 
-### Phase 1: Packaging & Runtime Foundation
+### Phase 1: macOS Hardening
+**Goal:** A clean macOS baseline: every test passes and autostart is proven on real hardware.
+**Depends on:** Nothing (first phase)
+**Requirements:** HARD-01, HARD-02, HARD-03
+**Success Criteria:**
+1. `npm test` on macOS exits 0, with `tests/update-rehearsal.test.mjs` included and none of its cases skipped
+2. After a full reboot with the app never opened, `launchctl print gui/$(id -u)/<Label>` shows the engine running and its HTTP endpoint answers
+3. With the engine forced into a crash loop, the app shows the remediation dialog and does not report "disabled"
+4. A phase VERIFICATION report records the reboot and crash-loop results
 
-**Goal**: An unsigned Orgtree `.app` builds and launches on real Apple Silicon and Intel Macs, with its Python engine runtime bundled inside it.
-**Depends on**: Nothing (first phase)
-**Requirements**: PKG-01, PKG-02, PKG-03, RUN-01
-**Success Criteria** (what must be TRUE):
+### Phase 2: Upstream Sync
+**Goal:** The fork contains current `upstream/main` with no regression on either platform.
+**Depends on:** Phase 1
+**Requirements:** SYNC-01, SYNC-02, SYNC-03
+**Success Criteria:**
+1. `git rev-list --count HEAD..upstream/main` returns 0
+2. The macOS `.app` builds, launches, and completes a real agent turn through the acceptance runner
+3. `npm test` on macOS exits 0 after the merge
+4. The Windows NSIS installer builds and installs on a Windows machine or CI runner
 
-  1. Running the mac build produces a `.app` that launches on Apple Silicon without an AMFI "app is damaged" failure, because it is ad-hoc signed (`mac.identity: "-"`).
-  2. The app's Dock and Finder icon displays as the real Orgtree icon, not a blank or default icon, because a `.icns` (generated via `iconutil`) is bundled instead of the Windows-only `.ico`.
-  3. A first-time user who hits the Gatekeeper block on double-click can follow documented steps (right-click → Open, or System Settings approval) to launch the app successfully — verified by hand on real Apple Silicon hardware.
-  4. `tools/provision-runtime.py` downloads and stages an arch-correct (`aarch64`/`x86_64`) `python-build-standalone` runtime into the build instead of hard-exiting on non-`win32`.
+### Phase 3: Signed Distribution
+**Goal:** Users get a `.dmg` that macOS trusts.
+**Depends on:** Phase 2
+**Requirements:** DIST-01
+**Success Criteria:**
+1. `codesign --verify --deep --strict` passes on the packaged `.app`
+2. `spctl --assess --type execute` accepts the app and `xcrun stapler validate` passes on the `.dmg`
+3. On a Mac that has never run Orgtree, the downloaded `.dmg` opens and launches without right-click Open or `xattr` workarounds
 
-**Plans**: 3 plans
-Plans:
+### Phase 4: macOS Auto-Update
+**Goal:** macOS users receive updates in-app, as Windows users already do.
+**Depends on:** Phase 3
+**Requirements:** DIST-02
+**Success Criteria:**
+1. An installed older signed build detects a newer published release and shows the update notice
+2. Accepting the update installs it and the app relaunches reporting the new version
+3. The updated app still passes `codesign --verify --deep --strict`
 
-- [ ] 01-01-PLAN.md — macOS runtime provisioning and layout verification (RUN-01)
-- [ ] 01-02-PLAN.md — .icns icon generation (PKG-02)
-- [ ] 01-03-PLAN.md — electron-builder mac target, ad-hoc signing, Gatekeeper docs (PKG-01, PKG-03)
-
-### Phase 2: Process Lifecycle Port
-
-**Goal**: The Python engine correctly finds, runs, monitors, and terminates provider CLI subprocesses on macOS.
-**Depends on**: Phase 1
-**Requirements**: PROC-01, PROC-02, PROC-03
-**Success Criteria** (what must be TRUE):
-
-  1. The engine locates and launches Claude Code, Codex, and Antigravity CLIs from their real macOS install paths (npm shims, Antigravity's own install location) via `shutil.which()`.
-  2. The engine's liveness check correctly reports whether a provider process is alive or dead on macOS, matching real process state (`os.kill(pid, 0)` verified against actual macOS behavior).
-  3. Stopping an agent kills the provider CLI and all of its descendant processes on macOS — including `codexrun.py`'s process, once it spawns with `start_new_session` like `gitrunner.py` already does — leaving no orphaned processes.
-
-**Plans**: 3/3 plans executed
-
-Plans:
-
-- [x] 02-01-PLAN.md — codexrun.py + antigravityrun.py: start_new_session spawn + os.killpg termination (PROC-03)
-- [x] 02-02-PLAN.md — supervisor.py (4 spawn sites + _wd_kill_tree) + mailhub_runtime.py orphan reclaim (PROC-03, D-07 scope)
-- [x] 02-03-PLAN.md — PROC-01/PROC-02 verification: mocked-path resolver tests + liveness confirmation
-
-### Phase 02.1: Engine Process Lifetime POSIX Adapter (INSERTED)
-
-**Goal**: The Python engine's process-lifetime guardian owns the engine's process tree and data-root lock on macOS (POSIX), reproducing the teardown guarantees of the existing Windows Job Object guardian, so the engine can start and run on macOS.
-**Depends on**: Phase 2
-**Requirements**: PROC-04
-**Success Criteria** (what must be TRUE):
-
-  1. `arm_process_lifetime()` succeeds on macOS (no `RuntimeError`) and returns a live guardian PID that owns the engine's process tree, matching `engine/launch.py`'s existing call site.
-  2. Normal engine exit and parent (desktop shell) process death both cause the guardian to terminate all descendant processes and release the root lock only after termination is confirmed — the same ordering guarantee the Windows guardian provides.
-  3. The guardian's existing contract is preserved: it never imports the API, reads credentials, or dispatches a provider, and killing the guardian directly to "detach" it is still unsupported (doing so tears down its owned tree).
-
-**Plans**: 1/1 plans executed
-
-Plans:
-
-- [x] 02.1-01-PLAN.md — PosixTree adapter (kqueue exit-detect + ps-based enumerate/sweep), launch.py self-setpgid fix, un-skip LifetimeTests + LaunchRefusalTests (PROC-04)
-
-### Phase 3: Launchd Autostart
-
-**Goal**: The engine starts automatically at login on macOS, and the user is alerted if that autostart silently stops working.
-**Depends on**: Phase 1, Phase 2
-**Requirements**: BOOT-01, BOOT-02
-**Success Criteria** (what must be TRUE):
-
-  1. After installing the per-user LaunchAgent plist (`~/Library/LaunchAgents/`) and logging in, the Python engine is already running without the user launching it manually — no Windows Scheduled Task or registry mechanism involved.
-  2. The LaunchAgent plist validates with `plutil -lint` and installs/uninstalls cleanly via `launchctl bootstrap`/`bootout`.
-  3. If macOS silently disables the LaunchAgent after a crash loop, the app detects this and prompts the user instead of failing to start with no explanation.
-
-**Plans**: 2/2 plans executed
-Plans:
-**Wave 1**
-
-- [x] 03-01-PLAN.md — Build launchagent-mac.ts: plist gen/lint/bootstrap/bootout (tracer, real round-trip), detectState() classification, remediation dialog content
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 03-02-PLAN.md — Wire darwin autostart into app startup; reboot-survival and extended crash-loop human-check items
-
-### Phase 4: macOS UI & OS Integration Parity
-
-**Goal**: Orgtree looks and behaves like a native macOS app instead of a ported Windows app.
-**Depends on**: Phase 1
-**Requirements**: UI-01, UI-02, UI-03, UI-04, UI-05, UPD-01
-**Success Criteria** (what must be TRUE):
-
-  1. When an org needs attention, the Dock icon bounces (`app.dock.bounce('critical')`) instead of relying on the Windows-only `flashFrame` window flash.
-  2. Closing the last Orgtree window leaves the app running in the Dock; clicking the Dock icon reopens a window (`window-all-closed`/`activate` follow macOS convention, not Windows close-quits-app behavior).
-  3. Orgtree has a native macOS app menu in the menu bar, where none exists today.
-  4. The Dock badge count and the menu-bar tray icon both reflect live app state — pending tickets/mail via `app.setBadgeCount()`, and light/dark appearance via a Template tray image.
-  5. The user sees a "new version available" notice when a newer release exists, without the app attempting to auto-apply the update.
-
-**Plans:** 2 plans
-Plans:
-
-- [ ] 04-01-PLAN.md — Mac update notice end-to-end (bridge platform flag, openReleasePage IPC, tray mirror) + Dock bounce/badge sharing one identity set (UPD-01, UI-01, UI-04)
-- [ ] 04-02-PLAN.md — Window lifecycle recreate-on-show, native App menu, tray Template icon (UI-02, UI-03, UI-05)
-
-**UI hint**: yes
-
-### Phase 5: End-to-End Verification & Test Coverage
-
-**Goal**: The macOS port is proven to work end-to-end and has automated coverage in place of the Windows-only skips.
-**Depends on**: Phase 1, Phase 2, Phase 3, Phase 4
-**Requirements**: VER-01, VER-02
-**Success Criteria** (what must be TRUE):
-
-  1. A user can package, launch, and run a full agent job on macOS — spawn an agent, watch it do real work, and see the result land back in Orgtree — with no manual workarounds.
-  2. Test runs on macOS exercise the scenarios that were previously Windows-only skips (installer, elevation-equivalent, taskbar/dock probes, `test_service_host.py`) instead of silently skipping them.
-
-**Plans**: 1/2 plans executed
-Plans:
-
-- [x] 05-01-PLAN.md — Real end-to-end agent-turn acceptance runner + process-lifecycle pre-flight gate (VER-01)
-- [x] 05-02-PLAN.md — POSIX descriptor-protection fix + macOS test-skip coverage closure (VER-02)
-
-## Progress
-
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Packaging & Runtime Foundation | 0/TBD | Not started | - |
-| 2. Process Lifecycle Port | 3/3 | Complete    | 2026-09-23 |
-| 3. Launchd Autostart | 2/2 | In Progress|  |
-| 4. macOS UI & OS Integration Parity | 0/TBD | Not started | - |
-| 5. End-to-End Verification & Test Coverage | 1/2 | In Progress|  |
+### Phase 5: Autostart Toggle
+**Goal:** Users control engine autostart without touching `launchctl`.
+**Depends on:** Phase 1
+**Requirements:** DIST-03
+**Success Criteria:**
+1. Turning the toggle off removes the LaunchAgent: `launchctl print gui/$(id -u)/<Label>` fails and no plist remains in `~/Library/LaunchAgents/`
+2. Turning it on reinstalls it, and the engine is running after a reboot
+3. The toggle's displayed state matches the LaunchAgent's real state after an app restart
